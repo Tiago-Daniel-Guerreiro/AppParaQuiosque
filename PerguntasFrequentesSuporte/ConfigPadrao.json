@@ -1,0 +1,793 @@
+{
+  "Perfil": "Padrao2",
+  "IndiceTemaAtual": 0,
+  "ConfiguracaoAplicacao": {
+    "PercentagemEcraParaBotoesAltura": 80,
+    "PercentagemEcraParaBotoesLargura": 100,
+    "BotoesPorLinha": 4,
+    "QuantidadeBotoes": 5,
+    "ConfiguracoesBotoesMenu": [
+      {
+        "Nome": "Explica\u00E7\u00E3o \nWifi",
+        "Tipo": "Forms",
+        "Diretorio_Link": "PassoAPasso[0]"
+      },
+      {
+        "Nome": "Esqueci-me \nda Senha",
+        "Tipo": "Link",
+        "Diretorio_Link": "https://web.novalaw.unl.pt/Help.asp"
+      },
+      {
+        "Nome": "Office \n365",
+        "Tipo": "PDF",
+        "Diretorio_Link": "AjudaOffice.pdf"
+      },
+      {
+        "Nome": "Retirar \nSenha",
+        "Tipo": "Link",
+        "Diretorio_Link": "https://hub.novalaw.pt/senhas?lang=pt"
+      },
+      {
+        "Nome": "Abrir\nConfigura\u00E7\u00F5es",
+        "Tipo": "Forms",
+        "Diretorio_Link": "Config"
+      }
+    ],
+    "ConfiguracoesSair_Mostrar": {
+      "BotaoEsconder_MostrarEsconderVisivel": true,
+      "BtnSairVisivel": true,
+      "PosicaoSuperior": false,
+      "PosicaoEsquerda": true,
+      "TextoBotaoMostrarEsconder": {
+        "BotoesVisiveis": "Esconder",
+        "BotoesEscondidos": "Mostrar",
+        "FormsAberto": "Feche a janela."
+      }
+    },
+    "ConfiguracoesPassoAPasso": [
+      {
+        "Titulo": "Passo a Passo",
+        "Imagens": [
+          null,
+          null,
+          null
+        ]
+      }
+    ]
+  },
+  "VisualAplicacao": {
+    "Titulo": "Menu de Bot\u00F5es",
+    "JanelasRedimensionaveis": true,
+    "JanelasMoveis": true,
+    "AparecerNaBarraDeTarefas": false,
+    "UsaIcone": false,
+    "CaminhoIcone": "",
+    "OpacidadeDoPrograma": 0.99,
+    "ProgramaNoTrayMenu": true,
+    "TamanhoJanelas": {
+      "Tamanhos": {
+        "Default": {
+          "IsEmpty": false,
+          "Width": 400,
+          "Height": 300
+        },
+        "Botoes_Sair_EsconderMostrar": {
+          "IsEmpty": false,
+          "Width": 240,
+          "Height": 150
+        },
+        "PassoAPasso": {
+          "IsEmpty": false,
+          "Width": 390,
+          "Height": 540
+        },
+        "Configuracoes": {
+          "IsEmpty": false,
+          "Width": 800,
+          "Height": 550
+        },
+        "Menu": {
+          "IsEmpty": false,
+          "Width": 1600,
+          "Height": 900
+        }
+      }
+    },
+    "Tema": [
+      {
+        "NomeTema": "Claro",
+        "CorFundo": {
+          "R": 255,
+          "G": 255,
+          "B": 255
+        },
+        "CorDoContraste": {
+          "R": 0,
+          "G": 0,
+          "B": 0
+        },
+        "TamanhoDoContraste": 3,
+        "VisualBotoes": {
+          "Configuracoes": {
+            "Default": {
+              "Fonte": {
+                "Name": "Arial",
+                "Size": 10,
+                "Style": "Regular"
+              },
+              "Margem": 10,
+              "IntensidadeArredondarBorda": 4,
+              "TamanhoContrasteBorda": 8,
+              "CorContrasteBorda": {
+                "R": 0,
+                "G": 0,
+                "B": 0
+              },
+              "CorTexto": {
+                "R": 0,
+                "G": 0,
+                "B": 0
+              },
+              "CorFundo": {
+                "R": 255,
+                "G": 255,
+                "B": 255
+              }
+            },
+            "Escolha perfil": {
+              "Fonte": {
+                "Name": "Arial",
+                "Size": 28,
+                "Style": "Bold"
+              },
+              "Margem": 20,
+              "IntensidadeArredondarBorda": 4,
+              "TamanhoContrasteBorda": 8,
+              "CorContrasteBorda": {
+                "R": 0,
+                "G": 0,
+                "B": 0
+              },
+              "CorTexto": {
+                "R": 0,
+                "G": 0,
+                "B": 0
+              },
+              "CorFundo": {
+                "R": 255,
+                "G": 255,
+                "B": 255
+              }
+            },
+            "lista detalhes": {
+              "Fonte": {
+                "Name": "Arial",
+                "Size": 20,
+                "Style": "Regular"
+              },
+              "Margem": 0,
+              "IntensidadeArredondarBorda": 0,
+              "TamanhoContrasteBorda": 0,
+              "CorContrasteBorda": {
+                "R": 0,
+                "G": 0,
+                "B": 0
+              },
+              "CorTexto": {
+                "R": 0,
+                "G": 0,
+                "B": 0
+              },
+              "CorFundo": {
+                "R": 255,
+                "G": 255,
+                "B": 255
+              }
+            },
+            "Arvore Configs": {
+              "Fonte": {
+                "Name": "Arial",
+                "Size": 20,
+                "Style": "Regular"
+              },
+              "Margem": 0,
+              "IntensidadeArredondarBorda": 0,
+              "TamanhoContrasteBorda": 0,
+              "CorContrasteBorda": {
+                "R": 0,
+                "G": 0,
+                "B": 0
+              },
+              "CorTexto": {
+                "R": 0,
+                "G": 0,
+                "B": 0
+              },
+              "CorFundo": {
+                "R": 255,
+                "G": 255,
+                "B": 255
+              }
+            },
+            "Botao de Salvar/Sair": {
+              "Fonte": {
+                "Name": "Arial",
+                "Size": 13,
+                "Style": "Regular"
+              },
+              "Margem": 20,
+              "IntensidadeArredondarBorda": 3,
+              "TamanhoContrasteBorda": 15,
+              "CorContrasteBorda": {
+                "R": 0,
+                "G": 0,
+                "B": 0
+              },
+              "CorTexto": {
+                "R": 0,
+                "G": 0,
+                "B": 0
+              },
+              "CorFundo": {
+                "R": 255,
+                "G": 255,
+                "B": 255
+              }
+            }
+          },
+          "Menu": {
+            "Default": {
+              "Fonte": {
+                "Name": "Arial",
+                "Size": 10,
+                "Style": "Regular"
+              },
+              "Margem": 10,
+              "IntensidadeArredondarBorda": 4,
+              "TamanhoContrasteBorda": 20,
+              "CorContrasteBorda": {
+                "R": 0,
+                "G": 0,
+                "B": 0
+              },
+              "CorTexto": {
+                "R": 0,
+                "G": 0,
+                "B": 0
+              },
+              "CorFundo": {
+                "R": 255,
+                "G": 255,
+                "B": 255
+              }
+            },
+            "Botao de Acao": {
+              "Fonte": {
+                "Name": "Arial",
+                "Size": 40,
+                "Style": "Bold"
+              },
+              "Margem": 50,
+              "IntensidadeArredondarBorda": 4,
+              "TamanhoContrasteBorda": 20,
+              "CorContrasteBorda": {
+                "R": 0,
+                "G": 0,
+                "B": 0
+              },
+              "CorTexto": {
+                "R": 0,
+                "G": 0,
+                "B": 0
+              },
+              "CorFundo": {
+                "R": 255,
+                "G": 255,
+                "B": 255
+              }
+            },
+            "Botao de Sair ou Esconder/Mostrar": {
+              "Fonte": {
+                "Name": "Arial",
+                "Size": 20,
+                "Style": "Bold"
+              },
+              "Margem": 20,
+              "IntensidadeArredondarBorda": 3,
+              "TamanhoContrasteBorda": 15,
+              "CorContrasteBorda": {
+                "R": 0,
+                "G": 0,
+                "B": 0
+              },
+              "CorTexto": {
+                "R": 0,
+                "G": 0,
+                "B": 0
+              },
+              "CorFundo": {
+                "R": 255,
+                "G": 255,
+                "B": 255
+              }
+            }
+          },
+          "PassoAPasso": {
+            "Default": {
+              "Fonte": {
+                "Name": "Arial",
+                "Size": 10,
+                "Style": "Regular"
+              },
+              "Margem": 10,
+              "IntensidadeArredondarBorda": 4,
+              "TamanhoContrasteBorda": 8,
+              "CorContrasteBorda": {
+                "R": 0,
+                "G": 0,
+                "B": 0
+              },
+              "CorTexto": {
+                "R": 0,
+                "G": 0,
+                "B": 0
+              },
+              "CorFundo": {
+                "R": 255,
+                "G": 255,
+                "B": 255
+              }
+            },
+            "Botao de Categoria": {
+              "Fonte": {
+                "Name": "Arial",
+                "Size": 14,
+                "Style": "Bold"
+              },
+              "Margem": 30,
+              "IntensidadeArredondarBorda": 4,
+              "TamanhoContrasteBorda": 8,
+              "CorContrasteBorda": {
+                "R": 0,
+                "G": 0,
+                "B": 0
+              },
+              "CorTexto": {
+                "R": 0,
+                "G": 0,
+                "B": 0
+              },
+              "CorFundo": {
+                "R": 255,
+                "G": 255,
+                "B": 255
+              }
+            },
+            "Botao Sair": {
+              "Fonte": {
+                "Name": "Arial",
+                "Size": 20,
+                "Style": "Regular"
+              },
+              "Margem": 20,
+              "IntensidadeArredondarBorda": 3,
+              "TamanhoContrasteBorda": 8,
+              "CorContrasteBorda": {
+                "R": 0,
+                "G": 0,
+                "B": 0
+              },
+              "CorTexto": {
+                "R": 0,
+                "G": 0,
+                "B": 0
+              },
+              "CorFundo": {
+                "R": 255,
+                "G": 255,
+                "B": 255
+              }
+            },
+            "Botao passar": {
+              "Fonte": {
+                "Name": "Arial",
+                "Size": 20,
+                "Style": "Regular"
+              },
+              "Margem": 20,
+              "IntensidadeArredondarBorda": 3,
+              "TamanhoContrasteBorda": 8,
+              "CorContrasteBorda": {
+                "R": 0,
+                "G": 0,
+                "B": 0
+              },
+              "CorTexto": {
+                "R": 0,
+                "G": 0,
+                "B": 0
+              },
+              "CorFundo": {
+                "R": 255,
+                "G": 255,
+                "B": 255
+              }
+            },
+            "Texto passo atual": {
+              "Fonte": {
+                "Name": "Arial",
+                "Size": 10,
+                "Style": "Regular"
+              },
+              "Margem": 20,
+              "IntensidadeArredondarBorda": 3,
+              "TamanhoContrasteBorda": 15,
+              "CorContrasteBorda": {
+                "R": 0,
+                "G": 0,
+                "B": 0
+              },
+              "CorTexto": {
+                "R": 0,
+                "G": 0,
+                "B": 0
+              },
+              "CorFundo": {
+                "R": 255,
+                "G": 255,
+                "B": 255
+              }
+            }
+          }
+        }
+      },
+      {
+        "NomeTema": "Escuro",
+        "CorFundo": {
+          "R": 0,
+          "G": 0,
+          "B": 0
+        },
+        "CorDoContraste": {
+          "R": 255,
+          "G": 255,
+          "B": 255
+        },
+        "TamanhoDoContraste": 3,
+        "VisualBotoes": {
+          "Configuracoes": {
+            "Default": {
+              "Fonte": {
+                "Name": "Arial",
+                "Size": 10,
+                "Style": "Regular"
+              },
+              "Margem": 10,
+              "IntensidadeArredondarBorda": 4,
+              "TamanhoContrasteBorda": 8,
+              "CorContrasteBorda": {
+                "R": 255,
+                "G": 255,
+                "B": 255
+              },
+              "CorTexto": {
+                "R": 255,
+                "G": 255,
+                "B": 255
+              },
+              "CorFundo": {
+                "R": 0,
+                "G": 0,
+                "B": 0
+              }
+            },
+            "Escolha perfil": {
+              "Fonte": {
+                "Name": "Arial",
+                "Size": 28,
+                "Style": "Bold"
+              },
+              "Margem": 20,
+              "IntensidadeArredondarBorda": 4,
+              "TamanhoContrasteBorda": 8,
+              "CorContrasteBorda": {
+                "R": 255,
+                "G": 255,
+                "B": 255
+              },
+              "CorTexto": {
+                "R": 255,
+                "G": 255,
+                "B": 255
+              },
+              "CorFundo": {
+                "R": 0,
+                "G": 0,
+                "B": 0
+              }
+            },
+            "lista detalhes": {
+              "Fonte": {
+                "Name": "Arial",
+                "Size": 20,
+                "Style": "Regular"
+              },
+              "Margem": 0,
+              "IntensidadeArredondarBorda": 0,
+              "TamanhoContrasteBorda": 0,
+              "CorContrasteBorda": {
+                "R": 255,
+                "G": 255,
+                "B": 255
+              },
+              "CorTexto": {
+                "R": 255,
+                "G": 255,
+                "B": 255
+              },
+              "CorFundo": {
+                "R": 0,
+                "G": 0,
+                "B": 0
+              }
+            },
+            "Arvore Configs": {
+              "Fonte": {
+                "Name": "Arial",
+                "Size": 20,
+                "Style": "Regular"
+              },
+              "Margem": 0,
+              "IntensidadeArredondarBorda": 0,
+              "TamanhoContrasteBorda": 0,
+              "CorContrasteBorda": {
+                "R": 255,
+                "G": 255,
+                "B": 255
+              },
+              "CorTexto": {
+                "R": 255,
+                "G": 255,
+                "B": 255
+              },
+              "CorFundo": {
+                "R": 0,
+                "G": 0,
+                "B": 0
+              }
+            },
+            "Botao de Salvar/Sair": {
+              "Fonte": {
+                "Name": "Arial",
+                "Size": 13,
+                "Style": "Regular"
+              },
+              "Margem": 20,
+              "IntensidadeArredondarBorda": 3,
+              "TamanhoContrasteBorda": 15,
+              "CorContrasteBorda": {
+                "R": 255,
+                "G": 255,
+                "B": 255
+              },
+              "CorTexto": {
+                "R": 255,
+                "G": 255,
+                "B": 255
+              },
+              "CorFundo": {
+                "R": 0,
+                "G": 0,
+                "B": 0
+              }
+            }
+          },
+          "Menu": {
+            "Default": {
+              "Fonte": {
+                "Name": "Arial",
+                "Size": 10,
+                "Style": "Regular"
+              },
+              "Margem": 10,
+              "IntensidadeArredondarBorda": 4,
+              "TamanhoContrasteBorda": 20,
+              "CorContrasteBorda": {
+                "R": 255,
+                "G": 255,
+                "B": 255
+              },
+              "CorTexto": {
+                "R": 255,
+                "G": 255,
+                "B": 255
+              },
+              "CorFundo": {
+                "R": 0,
+                "G": 0,
+                "B": 0
+              }
+            },
+            "Botao de Acao": {
+              "Fonte": {
+                "Name": "Arial",
+                "Size": 40,
+                "Style": "Bold"
+              },
+              "Margem": 50,
+              "IntensidadeArredondarBorda": 4,
+              "TamanhoContrasteBorda": 20,
+              "CorContrasteBorda": {
+                "R": 255,
+                "G": 255,
+                "B": 255
+              },
+              "CorTexto": {
+                "R": 255,
+                "G": 255,
+                "B": 255
+              },
+              "CorFundo": {
+                "R": 0,
+                "G": 0,
+                "B": 0
+              }
+            },
+            "Botao de Sair ou Esconder/Mostrar": {
+              "Fonte": {
+                "Name": "Arial",
+                "Size": 20,
+                "Style": "Bold"
+              },
+              "Margem": 20,
+              "IntensidadeArredondarBorda": 3,
+              "TamanhoContrasteBorda": 15,
+              "CorContrasteBorda": {
+                "R": 255,
+                "G": 255,
+                "B": 255
+              },
+              "CorTexto": {
+                "R": 255,
+                "G": 255,
+                "B": 255
+              },
+              "CorFundo": {
+                "R": 0,
+                "G": 0,
+                "B": 0
+              }
+            }
+          },
+          "PassoAPasso": {
+            "Default": {
+              "Fonte": {
+                "Name": "Arial",
+                "Size": 10,
+                "Style": "Regular"
+              },
+              "Margem": 10,
+              "IntensidadeArredondarBorda": 4,
+              "TamanhoContrasteBorda": 8,
+              "CorContrasteBorda": {
+                "R": 255,
+                "G": 255,
+                "B": 255
+              },
+              "CorTexto": {
+                "R": 255,
+                "G": 255,
+                "B": 255
+              },
+              "CorFundo": {
+                "R": 0,
+                "G": 0,
+                "B": 0
+              }
+            },
+            "Botao de Categoria": {
+              "Fonte": {
+                "Name": "Arial",
+                "Size": 14,
+                "Style": "Bold"
+              },
+              "Margem": 30,
+              "IntensidadeArredondarBorda": 4,
+              "TamanhoContrasteBorda": 8,
+              "CorContrasteBorda": {
+                "R": 255,
+                "G": 255,
+                "B": 255
+              },
+              "CorTexto": {
+                "R": 255,
+                "G": 255,
+                "B": 255
+              },
+              "CorFundo": {
+                "R": 0,
+                "G": 0,
+                "B": 0
+              }
+            },
+            "Botao Sair": {
+              "Fonte": {
+                "Name": "Arial",
+                "Size": 20,
+                "Style": "Regular"
+              },
+              "Margem": 20,
+              "IntensidadeArredondarBorda": 3,
+              "TamanhoContrasteBorda": 8,
+              "CorContrasteBorda": {
+                "R": 255,
+                "G": 255,
+                "B": 255
+              },
+              "CorTexto": {
+                "R": 255,
+                "G": 255,
+                "B": 255
+              },
+              "CorFundo": {
+                "R": 0,
+                "G": 0,
+                "B": 0
+              }
+            },
+            "Botao passar": {
+              "Fonte": {
+                "Name": "Arial",
+                "Size": 20,
+                "Style": "Regular"
+              },
+              "Margem": 20,
+              "IntensidadeArredondarBorda": 3,
+              "TamanhoContrasteBorda": 8,
+              "CorContrasteBorda": {
+                "R": 255,
+                "G": 255,
+                "B": 255
+              },
+              "CorTexto": {
+                "R": 255,
+                "G": 255,
+                "B": 255
+              },
+              "CorFundo": {
+                "R": 0,
+                "G": 0,
+                "B": 0
+              }
+            },
+            "Texto passo atual": {
+              "Fonte": {
+                "Name": "Arial",
+                "Size": 10,
+                "Style": "Regular"
+              },
+              "Margem": 20,
+              "IntensidadeArredondarBorda": 3,
+              "TamanhoContrasteBorda": 15,
+              "CorContrasteBorda": {
+                "R": 255,
+                "G": 255,
+                "B": 255
+              },
+              "CorTexto": {
+                "R": 255,
+                "G": 255,
+                "B": 255
+              },
+              "CorFundo": {
+                "R": 0,
+                "G": 0,
+                "B": 0
+              }
+            }
+          }
+        }
+      }
+    ]
+  }
+}

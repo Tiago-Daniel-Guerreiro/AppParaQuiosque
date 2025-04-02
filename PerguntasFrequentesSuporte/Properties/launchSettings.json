@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "PerguntasFrequentesSuporte": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "IdPerfilAtual": "0",
+        "CaminhoSalvamento": "Pasta_Executavel"
+      },
+      "remoteDebugEnabled": false
+    }
+  }
+}
