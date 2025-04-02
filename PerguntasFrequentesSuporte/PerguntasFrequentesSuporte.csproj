@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net5.0-windows</TargetFramework>
+    <TargetFramework>net8.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <AssemblyName>PerguntasFrequentesSuporte</AssemblyName>
     <ApplicationIcon>Icon App.ico</ApplicationIcon>
@@ -10,16 +10,15 @@
     <StartupObject>PerguntasFrequentesSuporte.Program</StartupObject>
     <Authors>Tiago Daniel Guerreiro</Authors>
     <Company />
-    <Description>Projeto de estágio.
-(19/2 - Atualemente privado)</Description>
-    <PackageProjectUrl>https://github.com/Gu3rr3iro-Escola/PerguntasFrequenteSuporte/</PackageProjectUrl>
+    <Description>Projeto de estágio.</Description>
+    <PackageProjectUrl>https://github.com/Tiago-Daniel-Guerreiro/AppParaQuiosque</PackageProjectUrl>
     <PackageIcon>Icon App.ico</PackageIcon>
     <PackageIconUrl />
     <RepositoryUrl>https://github.com/Tiago-Daniel-Guerreiro/AppParaQuiosque</RepositoryUrl>
     <SignAssembly>true</SignAssembly>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
-    <AssemblyVersion>1.0.0.2</AssemblyVersion>
+    <AssemblyVersion>1.2.0.0</AssemblyVersion>
     <UserSecretsId>d399ed4a-1e31-476c-a281-ace83f1aba49</UserSecretsId>
     <Configurations>Debug;Release;Teste</Configurations>
   </PropertyGroup>

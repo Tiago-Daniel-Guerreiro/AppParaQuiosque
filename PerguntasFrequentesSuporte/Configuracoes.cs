@@ -1,20 +1,35 @@
-﻿using System;
-using System.IO;
+﻿using BibliotecaAuxiliarForms.Ficheiros;
+using Microsoft.VisualBasic;
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.IO;
 using System.Reflection;
+using System.Text.Json;
 using System.Windows.Forms;
-using System.Collections.Generic;
-using Microsoft.VisualBasic;
-using System.Collections;
 
 namespace PerguntasFrequentesSuporte
 {
-    public partial class Configuracoes : Form 
-        // Erro que não dá para editar listas ou arrays porque não encontra o pai,
-        // quando se acede ao valor de alguma sub arvore o caminho fica apenas como subArvore.Variável e não como Arvore.SubArvore.Variável
-        // falta fazer apresentar dicionários, onde cada chave aparece como um subvalor e o valor que se edita é o da valor associado á chave, e nunca se edita a chave em si
+    public partial class Configuracoes : Form
+    // Erro que não dá para editar listas ou arrays porque não encontra o pai,
+    // quando se acede ao valor de alguma sub arvore o caminho fica apenas como subArvore.Variável e não como Arvore.SubArvore.Variável
+    // falta fazer apresentar dicionários, onde cada chave aparece como um subvalor e o valor que se edita é o da valor associado á chave, e nunca se edita a chave em si
     {
+        private List<AppConfig> PerfisDisponiveis = new();
+
+        private AppConfig PerfilAtual
+        {
+            get
+            {
+                int indice = comboBoxPerfis.SelectedIndex;
+                if (indice >= 0 && indice < PerfisDisponiveis.Count)
+                    return PerfisDisponiveis[indice];
+
+                return null;
+            }
+        }
         public Configuracoes()
         {
             InitializeComponent(); // Deve ser a primeira instrução do construtor
@@ -68,15 +83,15 @@ namespace PerguntasFrequentesSuporte
 
             switch (Type.GetTypeCode(tipo))
             {
-                case TypeCode.Int32:   return AbrirInputBoxInt32((int)metadata.Valor);
-                case TypeCode.Int64:   return AbrirInputBoxInt64((long)metadata.Valor);
-                case TypeCode.Double:  return AbrirInputBoxDouble((double)metadata.Valor);
-                case TypeCode.String:  return AbrirInputBoxString(metadata.Valor.ToString());
+                case TypeCode.Int32: return AbrirInputBoxInt32((int)metadata.Valor);
+                case TypeCode.Int64: return AbrirInputBoxInt64((long)metadata.Valor);
+                case TypeCode.Double: return AbrirInputBoxDouble((double)metadata.Valor);
+                case TypeCode.String: return AbrirInputBoxString(metadata.Valor.ToString());
                 case TypeCode.Boolean: return AbrirInputBoxBoolean();
                 case TypeCode.Object:
-                    if (metadata.Valor is Color cor) return BibliotecaAuxiliarForms.Input.InputBox.Color(new BibliotecaAuxiliarForms.Input.InputBoxOpcoes.Color("Escolha um cor:",$"Introduza o novo valor para a cor {metadata.NomeOriginal}",cor));
-                        if (metadata.Valor is Font fonte) return BibliotecaAuxiliarForms.Input.InputBox.Font(new BibliotecaAuxiliarForms.Input.InputBoxOpcoes.Font("Escolha um Fonte:", $"Introduza o novo valor para a fonte {metadata.NomeOriginal}",fonte));
-                        break;
+                    if (metadata.Valor is Color cor) return BibliotecaAuxiliarForms.Input.InputBox.Color(new BibliotecaAuxiliarForms.Input.InputBoxOpcoes.Color("Escolha um cor:", $"Introduza o novo valor para a cor {metadata.NomeOriginal}", cor));
+                    if (metadata.Valor is Font fonte) return BibliotecaAuxiliarForms.Input.InputBox.Font(new BibliotecaAuxiliarForms.Input.InputBoxOpcoes.Font("Escolha um Fonte:", $"Introduza o novo valor para a fonte {metadata.NomeOriginal}", fonte));
+                    break;
             }
 
             MessageBox.Show($"O tipo {tipo.Name} não é suportado para edição.");
@@ -106,27 +121,29 @@ namespace PerguntasFrequentesSuporte
             DialogResult resultado = MessageBox.Show("Ativar valor?", "Editar Booleano", MessageBoxButtons.YesNo);
             return resultado == DialogResult.Yes;
         }
-
-        // Supondo que tens uma variável global para a configuração:
-        private AppConfig appConfigInstance;
-        private void Configuracoes_Load(object sender, EventArgs e)  // Evento de carregamento do formulário
+        private void Configuracoes_Load(object sender, EventArgs e)
         {
-            // Carrega a configuração a partir de um ficheiro ou cria um novo objeto padrão
-            appConfigInstance = AcederConfig.ConfigAtual;
-
-            // Prenche a TreeView com a configuração
-            TreeViewConfig.Nodes.Clear();
-            TreeViewConfig.Nodes.Add(CriarTreeView(appConfigInstance));
-            comboBox1.Items.Clear(); // Se tens um ComboBox para selecionar temas, por exemplo:
-            foreach (var tema in appConfigInstance.VisualAplicacao.Tema)
-            {
-                comboBox1.Items.Add(tema.NomeTema);
-            }
-            // Seleciona o tema atual no ComboBox (caso haja)
-            if (appConfigInstance.IndiceTemaAtual < comboBox1.Items.Count)
-                comboBox1.SelectedIndex = appConfigInstance.IndiceTemaAtual;
+            CarregarPerfisNaComboBox();
         }
-        // Evento disparado quando um nó é selecionado na TreeView
+        private void CarregarPerfisNaComboBox()
+        {
+            PerfisDisponiveis = Ficheiros.ListarPerfisGuardados();
+
+            comboBoxPerfis.Items.Clear();
+
+            for (int i = 0; i < PerfisDisponiveis.Count; i++)
+            {
+                AppConfig perfil = PerfisDisponiveis[i];
+                if (perfil != null)
+                    comboBoxPerfis.Items.Add(perfil.Perfil);
+            }
+
+            // Seleciona o último usado com base na variável de ambiente
+            if (Ficheiros.IdPerfilAtual >= 0 && Ficheiros.IdPerfilAtual < comboBoxPerfis.Items.Count)
+                comboBoxPerfis.SelectedIndex = Ficheiros.IdPerfilAtual;
+            else if (comboBoxPerfis.Items.Count > 0)
+                comboBoxPerfis.SelectedIndex = 0;
+        }
         private void TreeViewConfig_AfterSelect(object sender, TreeViewEventArgs e)
         {
             listBoxDetalhes.Items.Clear();
@@ -150,9 +167,6 @@ namespace PerguntasFrequentesSuporte
                 }
             }
         }
-        // Método auxiliar para criar subnós de um objeto complexo
-
-        // Método que cria a TreeView (nó raiz) a partir de um objeto AppConfig
         public TreeNode CriarTreeView(AppConfig config)
         {
             // Cria o nó raiz representando a configuração principal
@@ -161,16 +175,16 @@ namespace PerguntasFrequentesSuporte
             // Percorre as propriedades públicas de AppConfig e cria nós recursivamente
             foreach (PropertyInfo prop in config.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
+                if (DeveIgnorarPropriedade(prop.Name))
+                    continue;
+
                 object valor = prop.GetValue(config);
-                // Cria o nó para esta propriedade (usando o método recursivo)
                 TreeNode noPropriedade = CriarTreeNodeRecursivo(valor, prop.Name, config, prop);
                 raiz.Nodes.Add(noPropriedade);
             }
 
             return raiz;
         }
-
-        // Método recursivo para criar um TreeNode para um objeto e suas propriedades
         private TreeNode CriarTreeNodeRecursivo(object objeto, string nome, object pai, PropertyInfo propPai = null)
         {
             // Formata o nome (ex.: "NomeVariavel" → "Nome variavel")
@@ -186,31 +200,24 @@ namespace PerguntasFrequentesSuporte
                 NomeOriginal = nome,
                 Valor = objeto,
                 Propriedade = propPai,
-                Descricao = propPai != null ? ObterDescricao(propPai) : "",
+                Descricao = ObterDescricao(propPai),
                 Pai = pai
             };
 
-            TreeNode no = new TreeNode(texto);
+            TreeNode no = new(texto);
             no.Tag = metadata;
 
             // Se o objeto for uma coleção (IList)
             if (objeto is IList lista)
             {
                 for (int i = 0; i < lista.Count; i++)
-                {
-                    object elem = lista[i];
-                    TreeNode noElem = CriarTreeNodeRecursivo(elem, $"{i}", objeto);
-                    no.Nodes.Add(noElem);
-                }
+                    no.Nodes.Add(CriarTreeNodeRecursivo(lista[i], $"{i}", objeto));
             }
             // Se for um dicionário (IDictionary)
             else if (objeto is IDictionary dict)
             {
                 foreach (DictionaryEntry entry in dict)
-                {
-                    TreeNode noEntry = CriarTreeNodeRecursivo(entry.Value, entry.Key.ToString(), objeto);
-                    no.Nodes.Add(noEntry);
-                }
+                    no.Nodes.Add(CriarTreeNodeRecursivo(entry.Value, entry.Key.ToString(), objeto));
             }
             // Se for um objeto complexo (não primitivo nem string) e for permitido aprofundar
             else if (objeto != null && !objeto.GetType().IsPrimitive && !(objeto is string) && PropriedadePermitida(objeto))
@@ -224,9 +231,7 @@ namespace PerguntasFrequentesSuporte
                     if (prop.GetCustomAttribute(typeof(BrowsableAttribute)) is BrowsableAttribute browsable && !browsable.Browsable)
                         continue;
 
-                    object valorProp = prop.GetValue(objeto);
-                    TreeNode noSub = CriarTreeNodeRecursivo(valorProp, prop.Name, objeto, prop);
-                    no.Nodes.Add(noSub);
+                    no.Nodes.Add(CriarTreeNodeRecursivo(prop.GetValue(objeto), prop.Name, objeto, prop));
                 }
             }
 
@@ -239,7 +244,6 @@ namespace PerguntasFrequentesSuporte
 
             Type tipo = valor.GetType();
 
-           
             if (valor is IList || valor is IDictionary)  // Permite listas e dicionários, mas ignora propriedades internas como SyncRoot
                 return true;
 
@@ -277,6 +281,8 @@ namespace PerguntasFrequentesSuporte
                 "value__",
                 "Count",
                 "Item",
+                "IndiceTemaAtual",
+                "Perfil",
                 "Capacity"
             };
 
@@ -301,11 +307,21 @@ namespace PerguntasFrequentesSuporte
         }
         private string ObterDescricao(PropertyInfo prop)
         {
-            // Tenta obter o atributo Description, se existir
-            var descAttr = prop.GetCustomAttribute(typeof(DescriptionAttribute)) as DescriptionAttribute;
-            return descAttr != null ? descAttr.Description : "";
+            if (prop == null)
+                return "";
+
+            object atributo = prop.GetCustomAttribute(typeof(DescriptionAttribute));
+
+            if (atributo == null)
+                return "";
+
+            DescriptionAttribute descriptionAttribute = (DescriptionAttribute)atributo;
+
+            if (descriptionAttribute.Description == null)
+                return "";
+
+            return descriptionAttribute.Description;
         }
-        // Atualiza a instância de AppConfig (ou objetos aninhados) a partir do valor guardado na tag de cada TreeNode
         private void AtualizarConfiguracao(TreeNode no)
         {
             if (no.Tag is NodeMetadata metadata)
@@ -335,22 +351,58 @@ namespace PerguntasFrequentesSuporte
         }
         private void BtnSalvar_Click(object sender, EventArgs e)
         {
-            Hide();
-           
+            Visible = false;
+
+            foreach (TreeNode no in TreeViewConfig.Nodes)
+                AtualizarConfiguracao(no);
+
             foreach (TreeNode no in TreeViewConfig.Nodes)  // Percorre todos os nós da TreeView e atualiza a configuração com os valores das tags
             {
                 AtualizarConfiguracao(no);
             }
 
-            int NovoId = Ficheiros.IdPerfilAtual + 1;
-            Ficheiros.SalvarConfig(NovoId, appConfigInstance);
-            Environment.SetEnvironmentVariable("IdPerfilAtual", NovoId.ToString(), EnvironmentVariableTarget.User) ;
+            Ficheiros.SalvarConfig(comboBoxPerfis.SelectedIndex, PerfilAtual);
+            Environment.SetEnvironmentVariable("IdPerfilAtual", comboBoxPerfis.SelectedIndex.ToString(), EnvironmentVariableTarget.User);
             Application.Restart();
         }
-
-        // Evento do botão Close para fechar a janela
         private void btnClose_Click(object sender, EventArgs e)
         {
+            if (VerificarAlteracoesPendentes())
+            {
+                var resultado = MessageBox.Show(
+                    "Existem alterações por guardar.\n\nDeseja guardar antes de sair?",
+                    "Alterações pendentes",
+                    MessageBoxButtons.YesNoCancel,
+                    MessageBoxIcon.Question);
+
+                if (resultado == DialogResult.Cancel)
+                    return;
+
+                if (resultado == DialogResult.Yes)
+                {
+                    foreach (TreeNode no in TreeViewConfig.Nodes)
+                        AtualizarConfiguracao(no);
+
+                    int indice = comboBoxPerfis.SelectedIndex;
+
+                    if (indice >= 0 && indice < PerfisDisponiveis.Count)
+                        Ficheiros.SalvarConfig(indice, PerfilAtual);
+                }
+
+                if (resultado == DialogResult.No)
+                {
+                    int indice = comboBoxPerfis.SelectedIndex;
+
+                    if (indice >= 0)
+                    {
+                        AppConfig original;
+
+                        if (Ficheiros.CarregarConfig(indice, out original))
+                            PerfisDisponiveis[indice] = original;
+                    }
+                }
+            }
+
             Hide();
         }
         private void Configuracoes_FormClosing(object sender, FormClosingEventArgs e)
@@ -360,6 +412,254 @@ namespace PerguntasFrequentesSuporte
                 e.Cancel = true;  // Impede o fecho
                 Hide();                 // Apenas esconde
             }
+        }
+        private void comboBoxPerfis_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            int novoIndice = comboBoxPerfis.SelectedIndex;
+
+            if (novoIndice < 0 || novoIndice >= PerfisDisponiveis.Count)
+                return;
+
+            if (VerificarAlteracoesPendentes())
+            {
+                var resultado = MessageBox.Show(
+                    "Existem alterações por guardar neste perfil.\n\nDeseja guardar antes de mudar?",
+                    "Alterações pendentes",
+                    MessageBoxButtons.YesNoCancel,
+                    MessageBoxIcon.Question);
+                if (resultado == DialogResult.Cancel)
+                {
+                    comboBoxPerfis.SelectedIndexChanged -= comboBoxPerfis_SelectedIndexChanged;
+                    comboBoxPerfis.SelectedIndex = PerfisDisponiveis.FindIndex(p => p.Perfil == PerfilAtual.Perfil);
+                    comboBoxPerfis.SelectedIndexChanged += comboBoxPerfis_SelectedIndexChanged;
+                    return;
+                }
+
+                if (resultado == DialogResult.Yes)
+                {
+                    foreach (TreeNode no in TreeViewConfig.Nodes)
+                        AtualizarConfiguracao(no);
+
+                    int atual = PerfisDisponiveis.FindIndex(p => p.Perfil == PerfilAtual.Perfil);
+
+                    if (atual >= 0)
+                        Ficheiros.SalvarConfig(atual, PerfilAtual);
+                }
+
+                if (resultado == DialogResult.No)
+                {
+                    int anterior = PerfisDisponiveis.FindIndex(p => p.Perfil == PerfilAtual.Perfil);
+                    if (anterior >= 0)
+                    {
+                        AppConfig recarregado;
+                        if (Ficheiros.CarregarConfig(anterior, out recarregado))
+                            PerfisDisponiveis[anterior] = recarregado;
+                    }
+                }
+            }
+
+            AtualizarInterfaceDoPerfilAtual();
+        }
+        private void AtualizarInterfaceDoPerfilAtual()
+        {
+            if (PerfilAtual == null)
+                return;
+
+            // Atualiza a TreeView com o novo perfil
+            TreeViewConfig.Nodes.Clear();
+            TreeViewConfig.Nodes.Add(CriarTreeView(PerfilAtual));
+
+            // Atualiza a lista de temas
+            comboBoxTema.SelectedIndexChanged -= comboBoxTema_SelectedIndexChanged; // desliga o evento
+            comboBoxTema.Items.Clear();
+
+            if (PerfilAtual.VisualAplicacao != null && PerfilAtual.VisualAplicacao.Tema != null)
+            {
+                foreach (TemaVisual tema in PerfilAtual.VisualAplicacao.Tema)
+                {
+                    if (tema != null)
+                        comboBoxTema.Items.Add(tema.NomeTema);
+                }
+
+                int indice = PerfilAtual.IndiceTemaAtual;
+
+                if (indice >= 0 && indice < comboBoxTema.Items.Count)
+                    comboBoxTema.SelectedIndex = indice;
+                else
+                    comboBoxTema.SelectedIndex = 0;
+            }
+
+            comboBoxTema.SelectedIndexChanged += comboBoxTema_SelectedIndexChanged; // volta a ligar o evento
+        }
+        private void comboBoxTema_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (PerfilAtual == null)
+                return;
+
+            PerfilAtual.IndiceTemaAtual = comboBoxTema.SelectedIndex; ;
+            AtualizarInterfaceDoPerfilAtual();
+        }
+        private void btnRenomearPerfil_Click(object sender, EventArgs e)
+        {
+            if (PerfilAtual == null)
+                return;
+
+            string nomeAntigo = PerfilAtual.Perfil;
+            string novoNome = AbrirInputBoxString($"Novo nome para o perfil '{nomeAntigo}':");
+
+            if (string.IsNullOrWhiteSpace(novoNome) || novoNome == nomeAntigo)
+                return;
+
+            foreach (var perfil in PerfisDisponiveis)
+            {
+                if (perfil != PerfilAtual && perfil.Perfil.Equals(novoNome, StringComparison.OrdinalIgnoreCase))
+                {
+                    MessageBox.Show("Já existe um perfil com esse nome.", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+            }
+
+            PerfilAtual.Perfil = novoNome;
+            comboBoxPerfis.Items[comboBoxPerfis.SelectedIndex] = novoNome;
+            Ficheiros.SalvarConfig(comboBoxPerfis.SelectedIndex, PerfilAtual);
+        }
+        private void btnNovoPerfil_Click(object sender, EventArgs e)
+        {
+            string nome = AbrirInputBoxString("Nome para o novo perfil: - Novo Perfil");
+
+            if (string.IsNullOrWhiteSpace(nome))
+                return;
+
+            foreach (var p in PerfisDisponiveis)
+            {
+                if (p.Perfil.ToLower() == nome.ToLower())
+                {
+                    MessageBox.Show("Já existe um perfil com esse nome.", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+            }
+
+            AppConfig novo = new AppConfig(PerfilAtual.VisualAplicacao, PerfilAtual.ConfiguracaoAplicacao, nome, PerfilAtual.IndiceTemaAtual);
+
+            int novoId = PerfisDisponiveis.Count;
+
+            Ficheiros.SalvarConfig(novoId, novo);
+            Ficheiros.CorrigirIdDeFicheiros();
+
+            CarregarPerfisNaComboBox();
+            comboBoxPerfis.SelectedIndex = novoId;
+        }
+        private void btnApagarPerfil_Click(object sender, EventArgs e)
+        {
+            int indice = comboBoxPerfis.SelectedIndex;
+
+            if (indice < 0 || PerfilAtual == null)
+                return;
+
+            if (PerfilAtual.Perfil == "Padrao")
+            {
+                MessageBox.Show("Não é possível apagar o perfil padrão.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            var confirm = MessageBox.Show("Tem a certeza que pretende apagar este perfil?", "Apagar Perfil", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            if (confirm != DialogResult.Yes)
+                return;
+
+            string caminho = Path.Combine(Ficheiros.Caminho, "Perfil_" + indice + ".json");
+
+            if (File.Exists(caminho))
+            {
+                try
+                {
+                    File.Delete(caminho);
+                }
+                catch
+                {
+                    MessageBox.Show("Erro ao apagar o ficheiro.", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+            }
+
+            Ficheiros.CorrigirIdDeFicheiros();
+            CarregarPerfisNaComboBox();
+        }
+        private bool VerificarAlteracoesPendentes()
+        {
+            int indice = comboBoxPerfis.SelectedIndex;
+
+            if (indice < 0)
+                return false;
+
+            if (!Ficheiros.CarregarConfig(indice, out AppConfig original))
+                return false;
+
+            string originalJson = JsonSerializer.Serialize(original, new FicheirosJsonConversores().ObterConfigs());
+            string atualJson = JsonSerializer.Serialize(PerfilAtual, new FicheirosJsonConversores().ObterConfigs());
+
+            return originalJson != atualJson;
+        }
+        private void btnResetarAlteracoes_Click(object sender, EventArgs e)
+        {
+            int indice = comboBoxPerfis.SelectedIndex;
+
+            if (indice < 0)
+                return;
+
+            AppConfig recarregado;
+
+            if (Ficheiros.CarregarConfig(indice, out recarregado))
+            {
+                PerfisDisponiveis[indice] = recarregado;
+
+                TreeViewConfig.Nodes.Clear();
+                TreeViewConfig.Nodes.Add(CriarTreeView(recarregado));
+
+                comboBoxTema.Items.Clear();
+
+                foreach (var tema in recarregado.VisualAplicacao.Tema)
+                    comboBoxTema.Items.Add(tema.NomeTema);
+
+                if (recarregado.IndiceTemaAtual >= 0 && recarregado.IndiceTemaAtual < comboBoxTema.Items.Count)
+                    comboBoxTema.SelectedIndex = recarregado.IndiceTemaAtual;
+            }
+        }
+        private void btnCarregarPadrao_Click(object sender, EventArgs e)
+        {
+            if (PerfilAtual == null)
+                return;
+
+            if (!Ficheiros.CarregarConfig(0, out AppConfig padrao))
+                padrao = Ficheiros.IniciarConfiguracoes();
+
+            // Mantém o nome e índice atuais
+            padrao.Perfil = PerfilAtual.Perfil;
+
+            // Substitui na lista principal
+            PerfisDisponiveis[comboBoxPerfis.SelectedIndex] = padrao;
+
+            // Atualiza UI
+            TreeViewConfig.Nodes.Clear();
+            TreeViewConfig.Nodes.Add(CriarTreeView(padrao));
+            AtualizarComboBoxTemas(padrao);
+        }
+        private void AtualizarComboBoxTemas(AppConfig config)
+        {
+            comboBoxTema.Items.Clear();
+
+            if (config.VisualAplicacao?.Tema == null)
+                return;
+
+            foreach (var tema in config.VisualAplicacao.Tema)
+            {
+                if (tema != null)
+                    comboBoxTema.Items.Add(tema.NomeTema);
+            }
+            comboBoxTema.SelectedIndex = 0;
+
+            if (config.IndiceTemaAtual >= 0 && config.IndiceTemaAtual < comboBoxTema.Items.Count)
+                comboBoxTema.SelectedIndex = config.IndiceTemaAtual;
         }
     }
 }

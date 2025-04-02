@@ -54,6 +54,7 @@ namespace PerguntasFrequentesSuporte
 
             CaminhoGuardado caminho = new(caminhoGuardado);
             Caminho = Path.Combine(caminho.ObterCaminhoCompleto("AppParaQuisoque"), "Perfil");
+            CorrigirIdDeFicheiros();
             AppConfig configuracoes = null;
             
             if (caminho.Tipo == TipoPasta.Recurso)
@@ -126,7 +127,7 @@ namespace PerguntasFrequentesSuporte
 
                 return false;
             }
-        } // vem direto para aqui ?
+        }
         public static void SalvarConfig(int idPerfil, AppConfig config)
         {
 
@@ -165,6 +166,136 @@ namespace PerguntasFrequentesSuporte
             {
                 return false; // Agora, em caso de erro, retorna null
             }
+        }
+        public static List<AppConfig> ListarPerfisGuardados()
+        {
+            List<AppConfig> perfis = new();
+
+            if (!Directory.Exists(Caminho))
+                return perfis;
+
+            string[] ficheiros = Directory.GetFiles(Caminho, "Perfil_*.json");
+
+            foreach (string ficheiro in ficheiros)
+            {
+                string nome = Path.GetFileNameWithoutExtension(ficheiro);
+
+                if (!nome.StartsWith("Perfil_"))
+                    continue;
+
+                if (int.TryParse(nome["Perfil_".Length..], out int idPerfil))
+                    if (CarregarConfig(idPerfil, out AppConfig config) && config != null)
+                        perfis.Add(config);
+            }
+           
+            List<AppConfig> resultado = new();  // Organiza a lista, colocando "Padrao" primeiro
+
+            foreach (AppConfig perfil in perfis)
+            {
+                if (perfil.Perfil == "Padrao")
+                    resultado.Insert(0, perfil);  // Adiciona o "Padrao" no início
+                else
+                    resultado.Add(perfil);  // Adiciona os outros perfis no final
+            }
+
+            return resultado;
+        }
+        public static void CorrigirIdDeFicheiros()
+        {
+            if (!Directory.Exists(Caminho))
+                return;
+
+            string[] ficheiros = Directory.GetFiles(Caminho, "Perfil_*.json");
+
+            List<(AppConfig Config, string CaminhoOriginal)> lista = new();
+
+            foreach (string caminho in ficheiros)
+            {
+                if (ObterIdDoFicheiro(caminho) < 0)
+                    continue;
+
+                try
+                {
+                    AppConfig config = JsonSerializer.Deserialize<AppConfig>(File.ReadAllText(caminho), new FicheirosJsonConversores().ObterConfigs());
+
+                    if (config != null)
+                        lista.Add((config, caminho));
+                }
+                catch { }
+            }
+
+            // Ordenar, garantindo que "Padrao" vem primeiro
+            List<(AppConfig, string)> ordenados = new();
+
+            foreach (var item in lista)
+            {
+                if (item.Config.Perfil == "Padrao")
+                    ordenados.Insert(0, item);
+                else
+                    ordenados.Add(item);
+            }
+
+            // Atualizar o IdPerfilAtual com base no nome do perfil atual
+            string nomePerfilAtual = "";
+
+            if (IdPerfilAtual >= 0 && IdPerfilAtual < ordenados.Count)
+                nomePerfilAtual = ordenados[IdPerfilAtual].Item1.Perfil;
+
+            int novoId = -1;
+
+            for (int i = 0; i < ordenados.Count; i++)
+            {
+                if (ordenados[i].Item1.Perfil == nomePerfilAtual)
+                {
+                    novoId = i;
+                    break;
+                }
+            }
+
+            if (novoId == -1 && ordenados.Count > 0)
+                novoId = ordenados.Count - 1;
+
+            if (novoId == -1)
+            {
+                Application.Restart();
+                return;
+            }
+
+            // Atualizar a variável IdPerfilAtual e guardar no ambiente
+            IdPerfilAtual = novoId;
+            Environment.SetEnvironmentVariable("IdPerfilAtual", IdPerfilAtual.ToString(), EnvironmentVariableTarget.User);
+
+            // Regravar os ficheiros com os novos nomes
+            for (int i = 0; i < ordenados.Count; i++)
+            {
+                AppConfig config = ordenados[i].Item1;
+                string caminhoAntigo = ordenados[i].Item2;
+                string caminhoNovo = Path.Combine(Caminho, "Perfil_" + i + ".json");
+
+                try
+                {
+                    if (File.Exists(caminhoNovo))
+                        File.Delete(caminhoNovo);
+
+                    config.Validate();
+
+                    GestorFicheirosJSON.SalvarConfig(caminhoNovo, config, new FicheirosJsonConversores().ObterConfigs(EscreverVariaveisVaziasNoJson));
+
+                    if (!string.Equals(caminhoAntigo, caminhoNovo, StringComparison.OrdinalIgnoreCase))
+                        File.Delete(caminhoAntigo);
+                }
+                catch { }
+            }
+        }
+        private static int ObterIdDoFicheiro(string caminho)
+        {
+            string nome = Path.GetFileNameWithoutExtension(caminho);
+
+            if (nome.StartsWith("Perfil_"))
+                if (int.TryParse(nome["Perfil_".Length..], out int valor))
+                    return valor;
+
+            return -1;
         }
     }
     public static class ConfiguracoesHelper

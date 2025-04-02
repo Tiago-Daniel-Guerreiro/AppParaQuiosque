@@ -595,7 +595,7 @@ namespace PerguntasFrequentesSuporte
             if (visualAplicacao != null)
                 VisualAplicacao = visualAplicacao; 
             
-            IndiceTemaAtual = Math.Max(0, Math.Min(VisualAplicacao.Tema.Count - 1, IndiceTemaAtual));
+            IndiceTemaAtual = Math.Max(0, Math.Min(VisualAplicacao.Tema.Count - 1, indiceTemaAtual));
 
             Validate();
         }
