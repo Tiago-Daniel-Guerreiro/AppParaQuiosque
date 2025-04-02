@@ -25,7 +25,7 @@ namespace PerguntasFrequentesSuporte
                 (
                     ficheiroLogHelper: new GestorFicheiroLog
                     (
-                        pastaDestino: Path.Combine(Ficheiros.Caminho, "Logs"),
+                        pastaDestino: Path.Combine(Ficheiros.Caminho, "Logs"), // Ainda não funciona corretamente
                         nomeFicheiro: "logs",
                         formatoFicheiro: "txt",
                         quantidadeMaxFicheiros: 3,
@@ -34,24 +34,7 @@ namespace PerguntasFrequentesSuporte
                         diasParaManterLogs: 7
                     ),
                     nivelMinimo: NivelLog.TRACE_DETAILED
-                ),
-                new EmailLogOutput // Envia logs CRITICAL por email
-                (
-                    config: new ConfigEmail
-                    (
-                        servidorSmtp: "gmail.com",
-                        portaSmtp: 587,
-                        emailRemetente: email,
-                        credencialAutenticacao: @"M:\\client_secret_128172112902 - oh7pim2o5nip24hhvc06slmbt9qfmsa0.apps.googleusercontent.com.json",
-                        usarApiKey: true, // Define true para usar API do Gmail
-                        caminho_credentials_json: @"M:\\client_secret_128172112902-oh7pim2o5nip24hhvc06slmbt9qfmsa0.apps.googleusercontent.com.json"
-                    ),
-                    NivelLog.TRACE_DETAILED
-                ),
-                new MensagemBoxLogOutput(nivelMinimo: NivelLog.TRACE_DETAILED), // Exibe logs em MessageBox
-                new DebugLogOutput(nivelMinimo: NivelLog.TRACE_DETAILED), // Regista logs no Debug
-                new TraceLogOutput(nivelMinimo: NivelLog.TRACE_DETAILED), // Regista logs no Trace
-                new InterfaceGraficaLogOutput(nivelMinimo: NivelLog.TRACE_DETAILED) // Mostra logs numa janela gráfica
+                )
             };
 
             LoggerGestor.Configurar( new 
@@ -59,8 +42,7 @@ namespace PerguntasFrequentesSuporte
                 configOutput: new // Configuração avançada do serviço de logs
                 (
                     juntarTudoEmUm: true,
-                    enviarACada: 10000,
-                    emailDestino: "tiagodguerreiro@gmail.com"
+                    enviarACada: 6000
                 ),
                 outputs: outputsLog
             ) );
