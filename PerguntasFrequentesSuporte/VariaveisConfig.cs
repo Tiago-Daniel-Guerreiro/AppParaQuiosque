@@ -6,7 +6,8 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Reflection;
 using System.Linq;
-using BibliotecaAuxiliarForms.Ficheiros;
+using BibliotecaAuxiliarForms.Utilidades.Matematica;
+using System.Text.Json.Serialization;
 
 // Talvez várias abas de botões
 // Por colocar segurança para fechar Programa e abrir Config 
@@ -329,59 +330,40 @@ namespace PerguntasFrequentesSuporte
             }
         }
     }
-    //---------------------------
-    // Classe para representar uma Imagem
-    //---------------------------
-    public class FicheiroImagem
+    public class FicheiroGenerico
     {
-        [Description("Nome do botão")]
-        public string NomeBotao { get; set; } = "Default";
+        [Description("Nome do ficheiro (sem o caminho)")]
+        public string NomeFicheiro { get; set; } = "";
 
-        [Description("Nome completo do ficheiro com extensão")]
-        public string NomeCompletoFicheiro { get; set; } = "Default.png";
+        [JsonIgnore]
+        public string CaminhoRelativo => Path.Combine("Documentos", NomeFicheiro);
 
-        [Description("Imagem carregada, se GuardarNoJson estiver ativado vai guardar a imagem no JSON usando Base64")]
-        public Image Imagem { get; set; } = null;
+        [JsonIgnore]
+        public string CaminhoCompleto => Path.Combine(Ficheiros.Caminho, CaminhoRelativo);
 
-        [Description("Indica se a imagem deve ser guardada no JSON, recomendado só para icon ou imagens muito pequenas, todas as imagens juntas não devem passar de 1MB, pode causar lentidão ao carregar o pograma")]
-        public bool GuardarNoJson { get; set; } = true;
-        public FicheiroImagem()
+        /// <summary>
+        /// Copia o ficheiro para a pasta Documentos e guarda apenas o nome
+        /// </summary>
+        public void AdicionarFicheiro(string caminhoOriginal)
         {
-            Validate();
+            if (string.IsNullOrWhiteSpace(caminhoOriginal) || !File.Exists(caminhoOriginal))
+                return;
+
+            string nome = Path.GetFileName(caminhoOriginal);
+            string destino = Path.Combine(Ficheiros.Caminho, "Documentos");
+
+            Directory.CreateDirectory(destino);
+
+            string caminhoDestino = Path.Combine(destino, nome);
+            File.Copy(caminhoOriginal, caminhoDestino, overwrite: true);
+
+            NomeFicheiro = nome;
         }
-        public FicheiroImagem(string nomeBotao, string nomeCompletoFicheiro, Image imagem)
-        {
-            NomeBotao = nomeBotao;
-            NomeCompletoFicheiro = nomeCompletoFicheiro;
-            Imagem = imagem;
 
-            Validate();
-        }
-        public void Validate()
-        {
-            if (string.IsNullOrWhiteSpace(NomeBotao))
-                NomeBotao = "Nome do Botão Default";
-
-            if (string.IsNullOrWhiteSpace(NomeCompletoFicheiro))
-                NomeCompletoFicheiro = "ImagemDefault.png";
-
-            string[] partes = NomeCompletoFicheiro.Split('.');
-            if (partes.Length < 2)
-            {
-                NomeCompletoFicheiro += ".png";
-            }
-            else
-            {
-                string formato = partes.Last().ToUpper();
-                string[] formatosPermitidos = { "ICO", "JPG", "JPEG", "GIF", "PNG" };
-
-                if (!formatosPermitidos.Contains(formato))
-                {
-                    BibliotecaAuxiliarForms.Log.RegistoLog.Log("Formato de imagem não permitido. O formato será alterado para PNG por defeito.");
-                    NomeCompletoFicheiro = string.Join(".", partes.Take(partes.Length - 1)) + ".png";
-                }
-            }
-        }
+        /// <summary>
+        /// Verifica se o ficheiro existe no local esperado
+        /// </summary>
+        public bool Existe => File.Exists(CaminhoCompleto);
     }
     //---------------------------
     // Dados do Passo a Passo com array fixo de 4 imagens (índices 0 a 3)
@@ -391,16 +373,97 @@ namespace PerguntasFrequentesSuporte
         [Description("Nome da janela do passo a passo")]
         public string Titulo { get; set; } = "Passo a Passo";
 
-        [Description("Imagens deste Passo a Passo")]
-        public FicheiroImagem[] Imagens { get; set; } = new FicheiroImagem[3]; // Inicialização direta
+        [Description("Nomes dos botões do Passo a Passo")]
+        public string[] NomeBotoes { get; set; } = new string[3];
+
+        public void AdicionarImagensAoBotao(int indiceBotao, string[] ficheiros)
+        {
+            if (indiceBotao < 0 || indiceBotao >= NomeBotoes.Length || ficheiros == null || ficheiros.Length == 0)
+                return;
+
+            string nomeBotao = NomeBotoes[indiceBotao];
+            if (string.IsNullOrWhiteSpace(nomeBotao))
+                return;
+
+            string pastaDestino = Path.Combine(Ficheiros.Caminho, "Imagens", Titulo, nomeBotao);
+            Directory.CreateDirectory(pastaDestino);
+
+            // Normaliza os ficheiros de entrada (caminhos absolutos, minúsculas, sem espaços extra)
+            HashSet<string> ficheirosEntrada = ficheiros
+                .Select(f => Path.GetFullPath(f).ToLowerInvariant())
+                .ToHashSet();
+
+            // Apaga apenas os ficheiros antigos que não estão na nova lista
+            try
+            {
+                foreach (var existente in Directory.GetFiles(pastaDestino))
+                {
+                    string caminhoNormalizado = Path.GetFullPath(existente).ToLowerInvariant();
+                    if (!ficheirosEntrada.Contains(caminhoNormalizado))
+                    {
+                        try { File.Delete(existente); } catch { }
+                    }
+                }
+            }
+            catch { }
+
+            // Copia os ficheiros com nomes sequenciais
+            int contador = 1;
+            foreach (var origem in ficheiros)
+            {
+                try
+                {
+                    string extensao = Path.GetExtension(origem);
+                    string nomeFinal = $"Imagem_{contador++}{extensao}";
+                    string destino = Path.Combine(pastaDestino, nomeFinal);
+
+                    // Evita copiar para cima de si mesmo
+                    if (!string.Equals(Path.GetFullPath(origem), Path.GetFullPath(destino), StringComparison.OrdinalIgnoreCase))
+                    {
+                        File.Copy(origem, destino, true);
+                    }
+                }
+                catch { }
+            }
+        }
+        public List<Image> ObterImagensDoBotao(int indiceBotao)
+        {
+            List<Image> imagens = new();
+
+            if (indiceBotao < 0 || indiceBotao >= NomeBotoes.Length)
+                return imagens;
+
+            string nomeBotao = NomeBotoes[indiceBotao];
+            string pasta = Path.Combine(Ficheiros.Caminho, "Imagens", Titulo, nomeBotao);
+
+            if (Directory.Exists(pasta))
+            {
+                foreach (var caminho in Directory.GetFiles(pasta).OrderBy(f => f))
+                {
+                    try { imagens.Add(Image.FromFile(caminho)); } catch { }
+                }
+            }
+
+            if (imagens.Count == 0)
+            {
+                try
+                {
+                    imagens.Add(Image.FromStream(
+                        Assembly.GetExecutingAssembly().GetManifestResourceStream("PerguntasFrequentesSuporte.Erro.png")));
+                }
+                catch { }
+            }
+
+            return imagens;
+        }
 
         public void Validate()
         {
             if (string.IsNullOrWhiteSpace(Titulo))
                 Titulo = "Passo a Passo";
 
-            if (Imagens == null || Imagens.Length != 3) // Garante sempre 3 posições
-                Imagens = new FicheiroImagem[3];
+            if (NomeBotoes == null || NomeBotoes.Length != 3)
+                NomeBotoes = new string[3];
         }
     }
     //---------------------------
@@ -461,38 +524,49 @@ namespace PerguntasFrequentesSuporte
     {
         [Description("Nome do Botão.")]
         public string Nome { get; set; } = "DefaultBotão";
-        [Description("Tipo do botão. " +  //Ainda por acresentar
-            "\nOpções:" +
-            "\n\t PDF" +
-            "\n\t LINK" +
-            "\n\t FORMS" +
-            "\n\tAinda por acresentar")]
+
+        [Description("Tipo do botão.\nOpções:\n\tPDF\n\tLINK\n\tFORMS")]
         public string Tipo { get; set; } = "Link";
-        [Description("Diretorio ou Link indica o arquivo/link que o botão vai abrir." +
-            "\n\tPara Pdf é o nome do ficheiro pdf sem .pdf" +
-            "\n\tPara Link é o link do site que se quer abrir" +
-            "\n\tPara forms pode ser CONFIG,FORMULARIO,PASSOAPASSO[ ]" +
-            "\n\tDentro do [] coloca-se o id do PassoA passo, se só houver 1 passo a passo o id é 0")]
+
+        [Description("Diretorio ou Link indica o arquivo/link que o botão vai abrir.\n" +
+            "\tPara PDF é preenchido automaticamente com base no nome do ficheiro (sem extensão).\n" +
+            "\tPara Link é o link do site que se quer abrir.\n" +
+            "\tPara Forms pode ser CONFIG, FORMULARIO ou PASSOAPASSO[ID]")]
         public string Diretorio_Link { get; set; } = "";
+
+        [Description("Ficheiro PDF associado ao botão (usado apenas quando Tipo for PDF)")]
+        public FicheiroGenerico DocumentoPDF { get; set; } = new();
 
         public void Validate()
         {
-            List<string> tiposPermitidos = new() { "FORMS", "LINK", "PDF" };   // Lista de tipos permitidos
+            List<string> tiposPermitidos = new() { "FORMS", "LINK", "PDF" };
 
-            if (string.IsNullOrWhiteSpace(Nome))  // Garante que o nome não está vazio
+            if (string.IsNullOrWhiteSpace(Nome))
                 Nome = "Botao Default";
 
-            if (string.IsNullOrWhiteSpace(Tipo) || !tiposPermitidos.Contains(Tipo, StringComparer.OrdinalIgnoreCase)) // Valida o tipo
-                Tipo = "LINK"; // Define como "Link" se o valor for inválido
+            if (string.IsNullOrWhiteSpace(Tipo) || !tiposPermitidos.Contains(Tipo, StringComparer.OrdinalIgnoreCase))
+                Tipo = "LINK";
 
-            if (string.IsNullOrWhiteSpace(Diretorio_Link)) // Valida o diretório ou link
+            if (Tipo.Equals("PDF", StringComparison.OrdinalIgnoreCase))
             {
-                if (Tipo.Equals("LINK", StringComparison.OrdinalIgnoreCase))
-                    Diretorio_Link = "https://example.com";
-                else if (Tipo.Equals("PDF", StringComparison.OrdinalIgnoreCase))
+                if (DocumentoPDF == null)
+                    DocumentoPDF = new FicheiroGenerico();
+
+                // Se não tiver ficheiro associado, usar default
+                if (string.IsNullOrWhiteSpace(DocumentoPDF.NomeFicheiro))
                     Diretorio_Link = "DocumentoDefault";
-                else if (Tipo.Equals("FORMS", StringComparison.OrdinalIgnoreCase))
-                    Diretorio_Link = "CONFIG";
+                else
+                    Diretorio_Link = Path.GetFileNameWithoutExtension(DocumentoPDF.NomeFicheiro);
+            }
+            else
+            {
+                if (string.IsNullOrWhiteSpace(Diretorio_Link))
+                {
+                    if (Tipo.Equals("LINK", StringComparison.OrdinalIgnoreCase))
+                        Diretorio_Link = "https://example.com";
+                    else if (Tipo.Equals("FORMS", StringComparison.OrdinalIgnoreCase))
+                        Diretorio_Link = "CONFIG";
+                }
             }
         }
     }
@@ -502,12 +576,12 @@ namespace PerguntasFrequentesSuporte
     public class ConfigGeral
     {
         [Description("Define qual a percentagem da altura do ecrã é que os botões do menu vão usar. " +
-            "\nO tamanho dos botões é definida automaticamente com todo o espaço disponivel na largura " +
-            "\n(Dica: Definir uma margem alta para que os botões não fiquem muito grandes)")]
+        "\nO tamanho dos botões é definida automaticamente com todo o espaço disponivel na largura " +
+        "\n(Dica: Definir uma margem alta para que os botões não fiquem muito grandes)")]
         public int PercentagemEcraParaBotoesAltura { get; set; } = 80;
         [Description("Define qual a percentagem da largura do ecrã é que os botões do menu vão usar. " +
-    "\nO tamanho dos botões é definida automaticamente com todo o espaço disponivel na largura " +
-    "\n(Dica: Definir uma margem alta para que os botões não fiquem muito grandes)")]
+        "\nO tamanho dos botões é definida automaticamente com todo o espaço disponivel na largura " +
+        "\n(Dica: Definir uma margem alta para que os botões não fiquem muito grandes)")]
         public int PercentagemEcraParaBotoesLargura { get; set; } = 100;
         [Description("Define a quantidade de botões que cada linha vai ter, não pode ter mais que 2 linhas no total")]
         public int BotoesPorLinha { get; set; } = 1
@@ -584,7 +658,6 @@ namespace PerguntasFrequentesSuporte
             Perfil = "Padrao";
             ConfiguracaoAplicacao = new ConfigGeral();
             VisualAplicacao = new AparenciaGeral();
-            IndiceTemaAtual = 0;
 
             if (!string.IsNullOrWhiteSpace(perfil))
                 Perfil = perfil;
@@ -595,7 +668,8 @@ namespace PerguntasFrequentesSuporte
             if (visualAplicacao != null)
                 VisualAplicacao = visualAplicacao; 
             
-            IndiceTemaAtual = Math.Max(0, Math.Min(VisualAplicacao.Tema.Count - 1, indiceTemaAtual));
+            OperacoesComuns.LimitarValor(Minimo:0, Maximo: VisualAplicacao.Tema.Count - 1, Valor: ref indiceTemaAtual);
+            IndiceTemaAtual = indiceTemaAtual; 
 
             Validate();
         }

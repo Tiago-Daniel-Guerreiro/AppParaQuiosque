@@ -38,15 +38,24 @@ namespace PerguntasFrequentesSuporte
             string IdPerfil_stringGuardade = Environment.GetEnvironmentVariable("IdPerfilAtual", EnvironmentVariableTarget.User);
             string caminhoGuardado = Environment.GetEnvironmentVariable("CaminhoSalvamento", EnvironmentVariableTarget.User);
 
-            bool variaveisNaoExistem = string.IsNullOrEmpty(IdPerfil_stringGuardade) || string.IsNullOrEmpty(caminhoGuardado);  // Verifica se as variáveis de ambiente já existem
+            bool variaveisNaoExistem = string.IsNullOrEmpty(IdPerfil_stringGuardade) || string.IsNullOrEmpty(caminhoGuardado);
 
             if (variaveisNaoExistem)
             {
-                Caminho = "Pasta_Executavel";
-                Environment.SetEnvironmentVariable("CaminhoSalvamento", Caminho, EnvironmentVariableTarget.User);
-                Environment.SetEnvironmentVariable("IdPerfilAtual", IdPerfilAtual.ToString(), EnvironmentVariableTarget.User);
+                string caminhoTemp = Path.Combine(
+                    Path.GetDirectoryName(System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName),
+                    "AppParaQuiosque", "Perfil");
 
-                return IniciarConfiguracoes();
+                // Verifica se já existem ficheiros de configuração na pasta do executável
+                bool perfisExistem = Directory.Exists(caminhoTemp) && Directory.EnumerateFiles(caminhoTemp, "*.json").Any();
+
+                if (!perfisExistem)
+                {
+                    Caminho = "Pasta_Executavel";
+                    Environment.SetEnvironmentVariable("CaminhoSalvamento", Caminho, EnvironmentVariableTarget.User);
+                    Environment.SetEnvironmentVariable("IdPerfilAtual", IdPerfilAtual.ToString(), EnvironmentVariableTarget.User);
+                    return IniciarConfiguracoes(); // Recomeça com variáveis definidas
+                }
             }
 
             if (int.TryParse(Environment.GetEnvironmentVariable("IdPerfilAtual", EnvironmentVariableTarget.User), out int idPerfil_Int))
@@ -56,12 +65,13 @@ namespace PerguntasFrequentesSuporte
             Caminho = Path.Combine(caminho.ObterCaminhoCompleto("AppParaQuisoque"), "Perfil");
             CorrigirIdDeFicheiros();
             AppConfig configuracoes = null;
-            
+
             if (caminho.Tipo == TipoPasta.Recurso)
             {
                 if (!CarregarConfiguracoesEmbutidas(out configuracoes))
                     configuracoes = null;
             }
+
             if (configuracoes == null)
             {
                 if (caminho.Tipo != TipoPasta.Executavel)
@@ -69,21 +79,22 @@ namespace PerguntasFrequentesSuporte
                     if (!Directory.Exists(Caminho))
                     {
                         Environment.SetEnvironmentVariable("CaminhoSalvamento", "Pasta_Executavel", EnvironmentVariableTarget.User);
-                        configuracoes = new AppConfig(); // Se também falhar, usa o Padrão
-                        SalvarConfig(IdPerfilAtual, configuracoes); // Salva em um arquivo novo
-                        Application.Restart(); // Reinicia assim carregando as configurações padrão
+                        configuracoes = new AppConfig();
+                        SalvarConfig(IdPerfilAtual, configuracoes);
+                        Application.Restart();
                     }
                 }
-                
-                if (!CarregarConfig(IdPerfilAtual, out configuracoes)) // Primeiro tenta carregar o perfil atual
+
+                if (!CarregarConfig(IdPerfilAtual, out configuracoes))
                 {
-                    if (!CarregarConfig(0, out configuracoes)) // Se falhar, tenta carregar o perfil 0
+                    if (!CarregarConfig(0, out configuracoes))
                     {
-                        configuracoes = new AppConfig(); // Se também falhar, usa o padrão e salva em um arquivo novo
+                        configuracoes = new AppConfig();
                         SalvarConfig(IdPerfilAtual, configuracoes);
                     }
                 }
             }
+
             return configuracoes;
         }
         public static bool CarregarConfig(int idPerfil, out AppConfig config)
@@ -216,12 +227,17 @@ namespace PerguntasFrequentesSuporte
 
                 try
                 {
-                    AppConfig config = JsonSerializer.Deserialize<AppConfig>(File.ReadAllText(caminho), new FicheirosJsonConversores().ObterConfigs());
+                    AppConfig config = JsonSerializer.Deserialize<AppConfig>(
+                        File.ReadAllText(caminho),
+                        new FicheirosJsonConversores().ObterConfigs());
 
                     if (config != null)
                         lista.Add((config, caminho));
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Erro ao ler ficheiro: {caminho}\n{ex.Message}", "Erro de leitura", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
             }
 
             // Ordenar, garantindo que "Padrao" vem primeiro
@@ -310,47 +326,58 @@ namespace PerguntasFrequentesSuporte
                 QuantidadeBotoes = 5,
                 ConfiguracoesBotoesMenu = new List<FuncaoBotaoMenu>
                 {
-                    new FuncaoBotaoMenu 
-                    { 
-                        Nome = "Explicação \nWifi", 
-                        Tipo = "FORMS", 
-                        Diretorio_Link = "PassoAPasso[0]" 
+                    new FuncaoBotaoMenu
+                    {
+                        Nome = "Explicação \nWifi",
+                        Tipo = "PDF",
+                        Diretorio_Link = "ConfigurarWifi",
+                        DocumentoPDF = new FicheiroGenerico
+                        {
+                            NomeFicheiro = "ConfigurarWifi.docx"
+                        }
                     },
-                    new FuncaoBotaoMenu 
-                    { 
-                        Nome = "Esqueci-me \nda Senha", 
-                        Tipo = "LINK", 
-                        Diretorio_Link = "https://web.novalaw.unl.pt/Help.asp" 
+                    new FuncaoBotaoMenu
+                    {
+                        Nome = "Esqueci-me \nda Senha",
+                        Tipo = "LINK",
+                        Diretorio_Link = "https://web.novalaw.unl.pt/Help.asp"
                     },
-                    new FuncaoBotaoMenu 
-                    { 
-                        Nome = "Office \n365", 
-                        Tipo = "PDF", 
-                        Diretorio_Link = "AjudaOffice.pdf" 
+                    new FuncaoBotaoMenu
+                    {
+                        Nome = "Office \n365",
+                        Tipo = "PDF",
+                        Diretorio_Link = "AjudaOffice",
+                        DocumentoPDF = new FicheiroGenerico
+                        {
+                            NomeFicheiro = "AjudaOffice.pdf"
+                        }
                     },
-                    new FuncaoBotaoMenu 
-                    { 
-                        Nome = "Retirar \nSenha", 
-                        Tipo = "LINK", 
-                        Diretorio_Link = "https://hub.novalaw.pt/senhas?lang=pt" 
+                    new FuncaoBotaoMenu
+                    {
+                        Nome = "Retirar \nSenha",
+                        Tipo = "LINK",
+                        Diretorio_Link = "https://hub.novalaw.pt/senhas?lang=pt"
                     }
-                    /*
-                    new FuncaoBotaoMenu 
-                    { 
-                        Nome = "Abrir\nConfigurações", 
-                        Tipo = "FORMS", 
-                        Diretorio_Link = "Config" 
-                    }
-                    */
                 },
                 ConfiguracoesSair_Mostrar = new ConfigSair_Mostrar
                 {
+                    BotaoEsconder_MostrarEsconderVisivel = true,
+                    BtnSairVisivel = true,
+                    PosicaoSuperior = false,
                     PosicaoEsquerda = false,
                     TextoBotaoMostrarEsconder = new Dictionary<string, string>
                     {
                         { "BotoesVisiveis", "Esconder" },
                         { "BotoesEscondidos", "Mostrar" },
                         { "FormsAberto", "Feche a janela." }
+                    }
+                },
+                ConfiguracoesPassoAPasso = new List<ConfigPassoAPasso>
+                {
+                    new ConfigPassoAPasso
+                    {
+                        Titulo = "Configurar Wifi",
+                        NomeBotoes = new[] { "Botao1", "Botao2", "Botao3" }
                     }
                 }
             };

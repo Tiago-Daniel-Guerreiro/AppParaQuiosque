@@ -1,12 +1,13 @@
-﻿using System;
-using System.IO;
-using System.Drawing;
-using System.Windows.Forms;
-using System.Collections.Generic;
+﻿using BibliotecaAuxiliarForms.Ficheiros;
 using BibliotecaAuxiliarForms.UI.MudancasVisuais;
-using BibliotecaAuxiliarForms.Ficheiros;
 using BibliotecaAuxiliarForms.Utilidades.Forms;
 using BibliotecaAuxiliarForms.Utilidades.Matematica;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Windows.Forms;
 
 namespace PerguntasFrequentesSuporte
 {
@@ -110,132 +111,124 @@ namespace PerguntasFrequentesSuporte
             if (form is PassoAPasso passoAPasso)
                 AplicarConfiguracoesPassoAPasso(passoAPasso);
         }
+        public static Button[] ObterBotoesOrdenadosDeForms(Control parent)
+        {
+            List<Button> botoes = new();
+            ProcurarBotoes(parent, ref botoes);
+
+            botoes.Sort(delegate (Button A, Button B)
+            {
+                int? numA = OperacoesComuns.ExtrairNumeroFinal(A.Name);
+                int? numB = OperacoesComuns.ExtrairNumeroFinal(B.Name);
+
+                if (numA < numB)
+                    return -1;
+
+                if (numA > numB)
+                    return 1;
+
+                return 0; // Quando numA == numB
+            });
+
+            return botoes.ToArray();
+        }
+        private static void ProcurarBotoes(Control parent, ref List<Button> botoes)
+        {
+            foreach (Control ctrl in parent.Controls)
+            {
+                if (ctrl is Button btn)
+                {
+                    if (OperacoesComuns.ExtrairNumeroFinal(btn.Name) != null)
+                        botoes.Add(btn);
+                }
+                else if (ctrl.HasChildren)
+                {
+                    ProcurarBotoes(ctrl, ref botoes);
+                }
+            }
+        }
         public static void AplicarConfiguracoesPassoAPasso(PassoAPasso passoAPasso)
         {
             if (passoAPasso == null || config.ConfiguracaoAplicacao.ConfiguracoesPassoAPasso == null)
-            {
-                MessageBox.Show("Erro: Configuração do Passo a Passo não está disponível.", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
-            }
 
             int id = 0;
-            if (passoAPasso.Tag != null && int.TryParse(passoAPasso.Tag.ToString(), out int resultado))
-                id = resultado;
+            if (passoAPasso.Tag != null)
+                if (!int.TryParse(passoAPasso.Tag.ToString(), out id))
+                    id = 0;
 
             if (id < 0 || id >= config.ConfiguracaoAplicacao.ConfiguracoesPassoAPasso.Count)
             {
-                MessageBox.Show($"Erro: O índice {id} não existe em Config_PassoAPasso.Dados.", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 passoAPasso.Close();
                 return;
             }
 
-            string caminhoImagens = Path.Combine(Ficheiros.Caminho, "ImagensPassoAPasso", id.ToString());
+            ConfigPassoAPasso configAtual = config.ConfiguracaoAplicacao.ConfiguracoesPassoAPasso[id];
+            passoAPasso.Text = configAtual.Titulo;
+            Image[][] listaImagens = new Image[configAtual.NomeBotoes.Length][];
 
-            if (!Directory.Exists(caminhoImagens))
+            foreach (Button btn in ObterBotoesOrdenadosDeForms(passoAPasso))
             {
-                MessageBox.Show($"A pasta {caminhoImagens} não existe. Por favor, carregue as imagens necessárias para essa pasta.",
-                    "Pasta não encontrada", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                passoAPasso.Close();
-                return;
-            }
+                int? numero = OperacoesComuns.ExtrairNumeroFinal(btn.Name);
 
-            // Obtém a configuração específica
-            ConfigPassoAPasso ConfigPassoAPassoAtual = config.ConfiguracaoAplicacao.ConfiguracoesPassoAPasso[id];
-            passoAPasso.Text = ConfigPassoAPassoAtual.Titulo;
-
-            Image[][] ListaImagens = new Image[ConfigPassoAPassoAtual.Imagens.Length][];
-
-            // Itera sobre os botões ordenados por número
-            foreach (Button btn in Utilidades_Forms.ObterBotoesOrdenadosDeForms(passoAPasso))
-            {
-                int? numero = OperacoesComuns.ExtrairNumeroFinal(btn.Name); // Extrai o número do nome do botão
-
-                if (numero.HasValue && ConfigPassoAPassoAtual.Imagens.Length > numero.Value)
+                if (numero.HasValue && numero.Value >= 0 && numero.Value < configAtual.NomeBotoes.Length)
                 {
-                    FicheiroImagem ficheiroImagem = ConfigPassoAPassoAtual.Imagens[numero.Value];
-                    btn.Text = ficheiroImagem.NomeCompletoFicheiro; // Define o texto do botão com o nome completo
+                    Image[] imagens = configAtual.ObterImagensDoBotao(numero.Value).ToArray();
+                    listaImagens[numero.Value] = imagens;
 
-                    // Obtém as imagens com base no caminho da pasta das imagens + o nome do ficheiro que contem o formato
-                    string[] arquivos = Directory.GetFiles(
-                        caminhoImagens,
-                        ficheiroImagem.NomeCompletoFicheiro );
-
-                    ListaImagens[numero.Value] = GestorFicheiros.ObterImagensDeFicheiros(arquivos, new[] { ficheiroImagem.Imagem }); 
+                    // Só define o texto, não mexe na visibilidade
+                    btn.Text = configAtual.NomeBotoes[numero.Value];
                 }
             }
 
-            // Atualiza a ListaTotal, se necessário
-            if (passoAPasso.ListaTotal == null || passoAPasso.ListaTotal.Length != ListaImagens.Length)
-            {
-                passoAPasso.ListaTotal = ListaImagens;
-            }
-            else
-            {
-                for (int i = 0; i < ListaImagens.Length; i++)
-                {
-                    // Verifica se o tamanho das sublistas está sincronizado
-                    if (passoAPasso.ListaTotal[i]?.Length != ListaImagens[i]?.Length)
-                    {
-                        passoAPasso.ListaTotal = ListaImagens;
-                        break;
-                    }
-                }
-            }
+            passoAPasso.ListaTotal = listaImagens;
 
-            AtualizarInterfacePassoAPasso(passoAPasso);  // Atualiza a interface
+            AtualizarInterfacePassoAPasso(passoAPasso);
         }
         private static void AtualizarInterfacePassoAPasso(PassoAPasso passoAPasso)
         {
-            int quantidadeImagens = passoAPasso.ListaTotal.Length, colunasAtivas = 0;
-            bool precisaReconstruir = false, temImagens = false;
+            int quantidadeImagens = passoAPasso.ListaTotal.Length;
 
-            foreach (Button btn in Utilidades_Forms.ObterBotoesOrdenadosDeForms(passoAPasso))
+            int colunasAtivas = 0;
+
+            int idConfig = Convert.ToInt32(passoAPasso.Tag);
+
+
+            var configAtual = config.ConfiguracaoAplicacao.ConfiguracoesPassoAPasso[idConfig];
+
+            Button[] botoes = ObterBotoesOrdenadosDeForms(passoAPasso);
+            passoAPasso.PanelBtns.Controls.Clear(); 
+
+
+            foreach (Button btn in botoes)
             {
                 int? numero = OperacoesComuns.ExtrairNumeroFinal(btn.Name);
-                if (numero.HasValue)
-                {
-                    if (quantidadeImagens > numero.Value)
-                    {
-                        if (passoAPasso.ListaTotal[numero.Value] != null)
-                        {
-                            if (passoAPasso.ListaTotal[numero.Value].Length > 0)
-                            {
-                                temImagens = true;
-                            }
-                        }
-                    }
 
-                    if (btn.Visible != temImagens) // Só marca reconstrução se houver mudança na visibilidade
-                        precisaReconstruir = true;
+                if (!numero.HasValue || numero.Value >= quantidadeImagens)
+                    continue;
 
-                    btn.Visible = temImagens;
+                int idx = numero.Value;
+                var imagens = passoAPasso.ListaTotal[idx];
+                bool temImagens = imagens != null && imagens.Length > 0;
+                bool temNome = !string.IsNullOrWhiteSpace(configAtual.NomeBotoes[idx]);
 
-                    if (temImagens)
-                        btn.Text = config.ConfiguracaoAplicacao.ConfiguracoesPassoAPasso[Convert.ToInt32(passoAPasso.Tag)].Imagens[numero.Value].NomeBotao;
-                }
+                string nomeBtn = configAtual.NomeBotoes[idx];
+
+                btn.Text = nomeBtn;
+                btn.Visible = temImagens || temNome;
+
+                if (btn.Visible)
+                    passoAPasso.PanelBtns.Controls.Add(btn, colunasAtivas++, 0);
             }
 
-            if (precisaReconstruir)  // Reconfigura o layout do painel de botões
-            {
-                passoAPasso.PanelBtns.Controls.Clear();
+            passoAPasso.PanelBtns.Controls.Add(passoAPasso.txtPasso, colunasAtivas++, 0);
+            passoAPasso.PanelBtns.ColumnCount = colunasAtivas;
+            passoAPasso.PanelBtns.ColumnStyles.Clear();
 
-                foreach (Button btn in Utilidades_Forms.ObterBotoesOrdenadosDeForms(passoAPasso))
-                {
-                    if (btn.Visible)
-                        passoAPasso.PanelBtns.Controls.Add(btn, colunasAtivas++, 0);
-                }
+            for (int i = 0; i < colunasAtivas - 1; i++)
+                passoAPasso.PanelBtns.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f / colunasAtivas));
 
-                passoAPasso.PanelBtns.Controls.Add(passoAPasso.txtPasso, colunasAtivas++, 0);
-                passoAPasso.PanelBtns.ColumnCount = colunasAtivas;
-
-                passoAPasso.PanelBtns.ColumnStyles.Clear();
-
-                for (int i = 0; i < colunasAtivas - 1; i++)
-                {
-                    passoAPasso.PanelBtns.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f / colunasAtivas));
-                }
-                passoAPasso.PanelBtns.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-            }
+            passoAPasso.PanelBtns.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
             passoAPasso.AtualizarImagem();
         }
         public static void AplicarAjustesVisuaisMenu(Menu menu)
@@ -364,15 +357,32 @@ namespace PerguntasFrequentesSuporte
         public static void AtualizarTudo()
         {
             List<Form> formularios = new();
+
             foreach (Form form in Application.OpenForms)
             {
                 formularios.Add(form);
+                formularios.AddRange(ObterFormsInternos(form));
             }
 
             foreach (Form form in formularios)
             {
                 AplicarConfiguracoesAoForm(form);
             }
+        }
+        private static IEnumerable<Form> ObterFormsInternos(Control parent)
+        {
+            List<Form> encontrados = new();
+
+            foreach (Control ctrl in parent.Controls)
+            {
+                if (ctrl is Form formInterno)
+                    encontrados.Add(formInterno);
+
+                // Pesquisa recursiva nos filhos
+                encontrados.AddRange(ObterFormsInternos(ctrl));
+            }
+
+            return encontrados;
         }
         private static void AplicarEstiloAoBotao(Button botao, VisualBotoesPorJanela aparencia)
         {
@@ -394,6 +404,5 @@ namespace PerguntasFrequentesSuporte
                 aparencia.CorContrasteBorda
             );
         }
-
     }
 }

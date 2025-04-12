@@ -8,17 +8,13 @@ using BibliotecaAuxiliarForms.Ficheiros;
 using BibliotecaAuxiliarForms.Emails;
 using BibliotecaAuxiliarForms.Log.Output;
 using System.IO;
+
 namespace PerguntasFrequentesSuporte
 {
     static class Program
     {
         static void Main()
         {
-            Email.TentarConverter("tiagodguerreiro@gmail.com", out Email email);
-
-            // ================================
-            //  CONFIGURAÇÃO COMPLETA DOS LOGS
-            // ================================
             List<ILogOutput> outputsLog = new()
             {
                 new ArquivoLogOutput // Grava as logs em ficheiro
@@ -47,11 +43,6 @@ namespace PerguntasFrequentesSuporte
                 outputs: outputsLog
             ) );
             LoggerGestor.ObterLogger().TestarFicheiros();
-            RegistoLog.Log("Inicializando aplicação com todas as configurações...", "Startup", NivelLog.INFO);
-
-            // =====================================
-            //  CONFIGURAÇÃO COMPLETA DOS FORMS
-            // =====================================
             Dictionary<Type, Size> tamanhos = new()
             {
                 { typeof(PassoAPasso), new Size(800, 600) },
@@ -62,10 +53,6 @@ namespace PerguntasFrequentesSuporte
                 tipoForm_Entrada: typeof(Menu),
                 tamanhosJanelas_Entrada: new BibliotecaAuxiliarForms.UI.TamanhoInicialJanelas(tamanhos)
             );
-
-            // =====================================
-            //  CONFIGURAÇÃO COMPLETA DA APLICAÇÃO
-            // =====================================
             ConfiguracoesApp configApp = new
             (
                 configForms_Entrada: configForms,
@@ -75,10 +62,6 @@ namespace PerguntasFrequentesSuporte
                     LoggerGestor.Parar();
                 }
             );
-
-            // =====================================
-            //  INICIALIZA A APLICAÇÃO COM TODAS AS CONFIGURAÇÕES
-            // =====================================
             GestorApp.Iniciar
             (
                 config: configApp,
@@ -87,7 +70,3 @@ namespace PerguntasFrequentesSuporte
         }
     }
 }
-
-// Console
-//Console Iniciada!
-//Pressione qualquer tecla para sair...

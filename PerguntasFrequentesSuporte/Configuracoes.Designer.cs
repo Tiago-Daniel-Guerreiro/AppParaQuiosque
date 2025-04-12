@@ -35,14 +35,14 @@ namespace PerguntasFrequentesSuporte
             btnSalvar = new System.Windows.Forms.Button();
             tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             tableLayoutPanel4 = new System.Windows.Forms.TableLayoutPanel();
-            btnRenomearPerfil = new System.Windows.Forms.Button();
-            button2 = new System.Windows.Forms.Button();
             button1 = new System.Windows.Forms.Button();
+            btnResetarAlteracoes = new System.Windows.Forms.Button();
+            button2 = new System.Windows.Forms.Button();
             tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             tableLayoutPanel8 = new System.Windows.Forms.TableLayoutPanel();
+            btnRenomearPerfil = new System.Windows.Forms.Button();
             btnCarregarPadrao = new System.Windows.Forms.Button();
-            btnResetarAlteracoes = new System.Windows.Forms.Button();
             tableLayoutPanel6 = new System.Windows.Forms.TableLayoutPanel();
             label2 = new System.Windows.Forms.Label();
             comboBoxTema = new System.Windows.Forms.ComboBox();
@@ -132,9 +132,9 @@ namespace PerguntasFrequentesSuporte
             tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
             tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
             tableLayoutPanel4.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            tableLayoutPanel4.Controls.Add(button2, 1, 0);
             tableLayoutPanel4.Controls.Add(button1, 0, 0);
-            tableLayoutPanel4.Controls.Add(btnResetarAlteracoes, 3, 0);
+            tableLayoutPanel4.Controls.Add(btnResetarAlteracoes, 1, 0);
+            tableLayoutPanel4.Controls.Add(button2, 3, 0);
             tableLayoutPanel4.Dock = System.Windows.Forms.DockStyle.Fill;
             tableLayoutPanel4.Location = new System.Drawing.Point(3, 464);
             tableLayoutPanel4.Name = "tableLayoutPanel4";
@@ -142,32 +142,6 @@ namespace PerguntasFrequentesSuporte
             tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             tableLayoutPanel4.Size = new System.Drawing.Size(778, 44);
             tableLayoutPanel4.TabIndex = 8;
-            // 
-            // btnRenomearPerfil
-            // 
-            btnRenomearPerfil.Dock = System.Windows.Forms.DockStyle.Fill;
-            btnRenomearPerfil.Location = new System.Drawing.Point(3, 3);
-            btnRenomearPerfil.Name = "btnRenomearPerfil";
-            btnRenomearPerfil.Size = new System.Drawing.Size(174, 49);
-            btnRenomearPerfil.TabIndex = 9;
-            btnRenomearPerfil.Tag = "Botao de Salvar/Sair";
-            btnRenomearPerfil.Text = "Renomear Perfil";
-            btnRenomearPerfil.UseVisualStyleBackColor = true;
-            btnRenomearPerfil.Click += btnRenomearPerfil_Click;
-            // 
-            // button2
-            // 
-            button2.Dock = System.Windows.Forms.DockStyle.Fill;
-            button2.Location = new System.Drawing.Point(200, 6);
-            button2.Margin = new System.Windows.Forms.Padding(6);
-            button2.Name = "button2";
-            button2.Padding = new System.Windows.Forms.Padding(3);
-            button2.Size = new System.Drawing.Size(182, 32);
-            button2.TabIndex = 4;
-            button2.Tag = "Botao de Salvar/Sair";
-            button2.Text = "Cancelar";
-            button2.UseVisualStyleBackColor = true;
-            button2.Click += btnClose_Click;
             // 
             // button1
             // 
@@ -182,6 +156,33 @@ namespace PerguntasFrequentesSuporte
             button1.Text = "Confirmar Alterações";
             button1.UseVisualStyleBackColor = true;
             button1.Click += BtnSalvar_Click;
+            // 
+            // btnResetarAlteracoes
+            // 
+            btnResetarAlteracoes.Dock = System.Windows.Forms.DockStyle.Fill;
+            btnResetarAlteracoes.Location = new System.Drawing.Point(200, 6);
+            btnResetarAlteracoes.Margin = new System.Windows.Forms.Padding(6);
+            btnResetarAlteracoes.Name = "btnResetarAlteracoes";
+            btnResetarAlteracoes.Size = new System.Drawing.Size(182, 32);
+            btnResetarAlteracoes.TabIndex = 2;
+            btnResetarAlteracoes.Tag = "Botao de Salvar/Sair";
+            btnResetarAlteracoes.Text = "Cancelar Alterações";
+            btnResetarAlteracoes.UseVisualStyleBackColor = true;
+            btnResetarAlteracoes.Click += btnResetarAlteracoes_Click;
+            // 
+            // button2
+            // 
+            button2.Dock = System.Windows.Forms.DockStyle.Fill;
+            button2.Location = new System.Drawing.Point(588, 6);
+            button2.Margin = new System.Windows.Forms.Padding(6);
+            button2.Name = "button2";
+            button2.Padding = new System.Windows.Forms.Padding(3);
+            button2.Size = new System.Drawing.Size(184, 32);
+            button2.TabIndex = 4;
+            button2.Tag = "Botao de Salvar/Sair";
+            button2.Text = "Fechar";
+            button2.UseVisualStyleBackColor = true;
+            button2.Click += btnClose_Click;
             // 
             // tableLayoutPanel2
             // 
@@ -233,6 +234,18 @@ namespace PerguntasFrequentesSuporte
             tableLayoutPanel8.Size = new System.Drawing.Size(361, 55);
             tableLayoutPanel8.TabIndex = 8;
             // 
+            // btnRenomearPerfil
+            // 
+            btnRenomearPerfil.Dock = System.Windows.Forms.DockStyle.Fill;
+            btnRenomearPerfil.Location = new System.Drawing.Point(3, 3);
+            btnRenomearPerfil.Name = "btnRenomearPerfil";
+            btnRenomearPerfil.Size = new System.Drawing.Size(174, 49);
+            btnRenomearPerfil.TabIndex = 9;
+            btnRenomearPerfil.Tag = "Botao de Salvar/Sair";
+            btnRenomearPerfil.Text = "Renomear Perfil";
+            btnRenomearPerfil.UseVisualStyleBackColor = true;
+            btnRenomearPerfil.Click += btnRenomearPerfil_Click;
+            // 
             // btnCarregarPadrao
             // 
             btnCarregarPadrao.Location = new System.Drawing.Point(183, 3);
@@ -243,18 +256,6 @@ namespace PerguntasFrequentesSuporte
             btnCarregarPadrao.Text = "Carregar Padrão";
             btnCarregarPadrao.UseVisualStyleBackColor = true;
             btnCarregarPadrao.Click += btnCarregarPadrao_Click;
-            // 
-            // btnResetarAlteracoes
-            // 
-            btnResetarAlteracoes.Dock = System.Windows.Forms.DockStyle.Fill;
-            btnResetarAlteracoes.Location = new System.Drawing.Point(585, 3);
-            btnResetarAlteracoes.Name = "btnResetarAlteracoes";
-            btnResetarAlteracoes.Size = new System.Drawing.Size(190, 38);
-            btnResetarAlteracoes.TabIndex = 2;
-            btnResetarAlteracoes.Tag = "Botao de Salvar/Sair";
-            btnResetarAlteracoes.Text = "Cancelar Alterações";
-            btnResetarAlteracoes.UseVisualStyleBackColor = true;
-            btnResetarAlteracoes.Click += btnResetarAlteracoes_Click;
             // 
             // tableLayoutPanel6
             // 

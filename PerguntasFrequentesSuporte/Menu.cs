@@ -26,17 +26,25 @@ namespace PerguntasFrequentesSuporte
             configForm.TopLevel = false;
             Controls.Add(configForm);
 
-            for (int i = 0; i < config.ConfiguracaoAplicacao.ConfiguracoesPassoAPasso.Count; i++) // Carregar e iniciar cada formulário de PassoAPasso
+            for (int i = 0; i < config.ConfiguracaoAplicacao.ConfiguracoesPassoAPasso.Count; i++)
             {
-                PassoAPasso passoForm = new() { Tag = i };
+                PassoAPasso passoForm = new();
+                passoForm.Tag = i;  // Atribui primeiro
+                Configuracao_AtualizacaoForms.AplicarConfiguracoesPassoAPasso(passoForm); // Só depois chama o setup
                 passoForm.Hide();
                 passoForm.TopLevel = false;
                 PassoForms.Add(passoForm);
-                Controls.Add(PassoForms[i]);
+                Controls.Add(passoForm);
             }
 
             Tag = "BotoesVisiveis";
         }
+        private void Menu_Load(object sender, EventArgs e)
+        {
+            Configuracao_AtualizacaoForms.AtualizarTudo();
+            Visible = true;
+        }
+
         public void BtnMudarEsconder_MostrarMenu_Click(object sender, EventArgs e)
         {
             MudarEstadoBtnMostrar_Esconder();
@@ -47,25 +55,35 @@ namespace PerguntasFrequentesSuporte
         }
         public void btn_Click(object sender, EventArgs e)
         {
-            Button btn = sender as Button;
-            if (btn != null)
+            if (sender is Button btn)
             {
-                int? NumBotoa = OperacoesComuns.ExtrairNumeroFinal(btn.Name);
-                if (NumBotoa.HasValue && NumBotoa.Value <= config.ConfiguracaoAplicacao.ConfiguracoesBotoesMenu.Count - 1)
-                    AcaoDoBotao(config.ConfiguracaoAplicacao.ConfiguracoesBotoesMenu[NumBotoa.Value].Tipo, config.ConfiguracaoAplicacao.ConfiguracoesBotoesMenu[NumBotoa.Value].Diretorio_Link);
+                int? NumBotao = OperacoesComuns.ExtrairNumeroFinal(btn.Name);
+                if (NumBotao.HasValue && NumBotao.Value < config.ConfiguracaoAplicacao.ConfiguracoesBotoesMenu.Count)
+                {
+                    FuncaoBotaoMenu funcao = config.ConfiguracaoAplicacao.ConfiguracoesBotoesMenu[NumBotao.Value];
+                    AcaoDoBotao(funcao);
+                }
             }
         }
-        public void AcaoDoBotao(string Tipo, string Diretorio_Link)
+        public void AcaoDoBotao(FuncaoBotaoMenu funcao)
         {
-            if (Tipo.ToUpper() == "FORMS")
-                MudarEstadoBtnMostrar_Esconder(true);
-            else
-                MudarEstadoBtnMostrar_Esconder();
-            switch (Tipo.ToUpper())
+            bool AbrirForm = funcao.Tipo.ToUpper() == "FORMS";
+            MudarEstadoBtnMostrar_Esconder(AbrirForm);
+
+            switch (funcao.Tipo.ToUpper())
             {
-                case "PDF": AbrirPDF(Diretorio_Link); break;
-                case "LINK": AbrirSite(Diretorio_Link); break;
-                case "FORMS": AbrirForms(Diretorio_Link); break;
+                case "PDF":
+                    string caminhoPDF = Path.Combine(Ficheiros.Caminho, "Documentos", funcao.DocumentoPDF?.NomeFicheiro ?? "");
+                    AbrirPDF(caminhoPDF);
+                    break;
+
+                case "LINK":
+                    AbrirSite(funcao.Diretorio_Link);
+                    break;
+
+                case "FORMS":
+                    AbrirForms(funcao.Diretorio_Link);
+                    break;
             }
         }
         private void AbrirPDF(string caminhoPDF)
@@ -147,27 +165,6 @@ namespace PerguntasFrequentesSuporte
                 PassoForms[indice].BringToFront();
             }
         }
-        private void Menu_Load(object sender, EventArgs e)
-        {
-            BibliotecaAuxiliarForms.Log.LoggerGestor.ObterLogger().Log("Teste0", "TEste", BibliotecaAuxiliarForms.Log.NivelLog.CRITICAL);
-            BibliotecaAuxiliarForms.Log.LoggerGestor.ObterLogger().Log("Teste1", "TEste", BibliotecaAuxiliarForms.Log.NivelLog.CRITICAL);
-            BibliotecaAuxiliarForms.Log.LoggerGestor.ObterLogger().Log("Teste2", "TEste", BibliotecaAuxiliarForms.Log.NivelLog.CRITICAL);
-            BibliotecaAuxiliarForms.Log.LoggerGestor.ObterLogger().Log("Teste3", "TEste", BibliotecaAuxiliarForms.Log.NivelLog.CRITICAL);
-            BibliotecaAuxiliarForms.Log.LoggerGestor.ObterLogger().Log("Teste4", "TEste", BibliotecaAuxiliarForms.Log.NivelLog.CRITICAL);
-            BibliotecaAuxiliarForms.Log.LoggerGestor.ObterLogger().Log("Teste5", "TEste", BibliotecaAuxiliarForms.Log.NivelLog.CRITICAL);
-            BibliotecaAuxiliarForms.Log.LoggerGestor.ObterLogger().Log("Teste6", "TEste", BibliotecaAuxiliarForms.Log.NivelLog.CRITICAL);
-            BibliotecaAuxiliarForms.Log.LoggerGestor.ObterLogger().Log("Teste7", "TEste", BibliotecaAuxiliarForms.Log.NivelLog.CRITICAL);
-            BibliotecaAuxiliarForms.Log.LoggerGestor.ObterLogger().Log("Teste8", "TEste", BibliotecaAuxiliarForms.Log.NivelLog.CRITICAL);
-            BibliotecaAuxiliarForms.Log.LoggerGestor.ObterLogger().Log("Teste9", "TEste", BibliotecaAuxiliarForms.Log.NivelLog.CRITICAL);
-            BibliotecaAuxiliarForms.Log.LoggerGestor.ObterLogger().Log("Teste10", "TEste", BibliotecaAuxiliarForms.Log.NivelLog.CRITICAL);
-            BibliotecaAuxiliarForms.Log.LoggerGestor.ObterLogger().Log("Teste11", "TEste", BibliotecaAuxiliarForms.Log.NivelLog.CRITICAL);
-            BibliotecaAuxiliarForms.Log.LoggerGestor.ObterLogger().Log("Teste12", "TEste", BibliotecaAuxiliarForms.Log.NivelLog.CRITICAL);
-            BibliotecaAuxiliarForms.Log.LoggerGestor.ObterLogger().Log("Teste13", "TEste", BibliotecaAuxiliarForms.Log.NivelLog.CRITICAL);
-
-
-            Configuracao_AtualizacaoForms.AtualizarTudo();
-            Visible = true;
-        }
         public void MudarEstadoBtnMostrar_Esconder(bool AbrirForms = false)
         {
             if ((string)Tag == "BotoesVisiveis")  // Se o estado for "BotoesVisiveis", ocultamos os botões e atualizamos o estado
@@ -213,7 +210,8 @@ namespace PerguntasFrequentesSuporte
             CriarEstruturaMenuInicial(out TreeNode estruturaMenu);
             CriarMapaDeAcoes(out Dictionary<string, Action> acoes);
 
-            IniciarTrayIcon(
+            IniciarTrayIcon
+            (
                 estruturaMenu: estruturaMenu,
                 acoes: acoes,
                 icone: Icon.ExtractAssociatedIcon(Application.ExecutablePath),
@@ -283,7 +281,7 @@ namespace PerguntasFrequentesSuporte
             if (!menu.Visible)
                 MostrarEsconder();
 
-            menu.AcaoDoBotao("FORMS", "CONFIG");
+            menu.AbrirForms("CONFIG");
         }
         private void ReiniciarApp()
         {
